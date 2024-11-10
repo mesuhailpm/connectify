@@ -4,11 +4,12 @@ const initialState = {
     user: null,        // Stores the logged-in user's details
     token: !!localStorage.getItem('token'),       // JWT token for authentication
     isAuthenticated: false, // Whether the user is logged in
-    loading: false,    // Loading status for async requests
+    loading: true,    // Loading status for async requests
     error: null,       // Errors during login/signup
   };
   
   const authReducer = (state = initialState, action) => {
+    if (!action.type.startsWith("@@")) {console.log(action)}
     switch (action.type) {
       case AUTH_REQUEST:
         return {

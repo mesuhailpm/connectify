@@ -10,6 +10,7 @@ const initialState = {
   };
   
   const chatReducer = (state = initialState, action) => {
+  if (!action.type.startsWith("@@")) {
     switch (action.type) {
       case FETCH_CHATS_REQUEST:
         return {
