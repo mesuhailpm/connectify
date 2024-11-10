@@ -1,33 +1,158 @@
-const Chat = require('../models/Chat');
-const Message = require('../models/Message');
+const Chat = require("../models/Chat");
+const Message = require("../models/Message");
 
 // Get all chat threads for the logged-in user
 exports.getChats = async (req, res) => {
+  console.log("will fetch chats");
   try {
-    const chats = await Chat.find({ participants: req.user._id }).populate('lastMessage');
-    res.status(200).json({ success: true, data: chats });
+    console.log(req.user._id.toString(),' is user ID of request will search for the chats where this is participant')
+    const chats = await Chat.find({ participants: req.user._id.toString() })
+      .populate({
+        path: "participants",
+        select: "username avatar",
+      })
+      .populate({
+        path: "lastMessage",
+        select: "content sender status readBy",
+      })
+      .exec();
+    console.log(chats, "chats");
+
+    const formattedChats = chats.map((chat) => {
+      const otherParticipant = chat.participants.find(
+        (participant) => !participant._id.equals(req.user._id)
+      );
+
+      // Check if lastMessage exists before accessing its properties
+      const lastMessage = chat.lastMessage || {};
+
+      const isOutgoing = lastMessage.sender
+        ? lastMessage.sender.equals(req.user._id)
+        : false;
+      const isRead = lastMessage.readBy
+        ? lastMessage.readBy.includes(req.user._id)
+        : false;
+      const messageStatus = isRead ? "read" : isOutgoing ? "sent" : "received";
+      console.log("i will return ", {
+        _id: chat._id,
+        username: otherParticipant.username,
+        avatar: otherParticipant.avatar,
+        lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
+        isOutgoing,
+        isRead,
+        messageStatus,
+        updatedAt: chat.updatedAt,
+      });
+
+      return {
+        _id: chat._id,
+        username: otherParticipant.username,
+        avatar: otherParticipant.avatar,
+        lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
+        isOutgoing,
+        isRead,
+        messageStatus,
+        updatedAt: chat.updatedAt,
+      };
+    });
+
+    res.status(200).json({ success: true, data: formattedChats });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching chats', error });
+    console.log("error inside getChats", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching chats", error });
   }
 };
 
-// Create a new chat thread
+// Create a new chat thread or fetch existing chats
 exports.createChat = async (req, res) => {
   try {
     const { participants } = req.body;
+    console.log(req.body, " req body inside createChat");
+    console.log({ participants }, "chat participants inside createChat");
 
-    // Check if the chat between the participants already exists
+    //*********************************** */
+
     let chat = await Chat.findOne({
       participants: { $all: participants },
-    });
+    })
+      .populate({
+        path: "participants",
+        select: "username avatar",
+      })
+      .populate({
+        path: "lastMessage",
+        select: "content sender status readBy",
+      })
+      .exec();
+    console.log(chat, "is eixsting chat");
+
+    // Check if the chat between the participants already exists
+    // let chat = await Chat.findOne({
+    //   participants: { $all: participants },
+    // });
 
     if (!chat) {
+      console.log(" will create a new chat now!");
       chat = await Chat.create({ participants });
+      console.log({ chat }, " is new chat");
+      const newChat = await chat.populate({
+        path:'participants',
+        select:'username avatar',
+      })
+      chat = newChat
+      console.log({ chat }, " is new chat with participant populated");
+
     }
 
-    res.status(201).json({ success: true, data: chat });
+    const formattedChat = (chat) => {
+      const otherParticipant = chat.participants.find(
+        (participant) => !participant._id.equals(req.user._id)
+      );
+
+      // Check if lastMessage exists before accessing its properties
+      const lastMessage = chat.lastMessage || {};
+
+      const isOutgoing = lastMessage.sender
+        ? lastMessage.sender.equals(req.user._id)
+        : false;
+      const isRead = lastMessage.readBy
+        ? lastMessage.readBy.includes(req.user._id)
+        : false;
+      const messageStatus = isRead ? "read" : isOutgoing ? "sent" : "received";
+
+      console.log("i will return ", {
+        _id: chat._id,
+        username: otherParticipant.username,
+        avatar: otherParticipant.avatar,
+        lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
+        isOutgoing,
+        isRead,
+        messageStatus,
+        updatedAt: chat.updatedAt,
+      });
+
+      return {
+        _id: chat._id,
+        username: otherParticipant.username,
+        avatar: otherParticipant.avatar,
+        lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
+        isOutgoing,
+        isRead,
+        messageStatus,
+        updatedAt: chat.updatedAt,
+      };
+    };
+    const result = formattedChat(chat)
+    console.log(result, " these formated chat will be returned");
+
+    res.status(200).json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error creating chat', error });
+    console.log(error);
+    res
+      .status(500)      
+      .json({ success: false, message: "Error creating chat", error });
   }
 };
 
@@ -49,18 +174,76 @@ exports.sendMessage = async (req, res) => {
 
     res.status(201).json({ success: true, data: message });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error sending message', error });
+    console.error(error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error sending message", error });
   }
 };
 
 // Get all messages from a specific chat
-exports.getMessages = async (req, res) => {
+exports.getChatMessages = async (req, res) => {
+  console.log("inside chatController.getChatMessages()");
+  console.log(
+    req.params,
+    " request parameter inside chatController.getChatMessages()"
+  );
+  const { chatId } = req.params; // Get chatId from URL parameters
+  const userId = req.user._id.toString(); // Get the ID of the logged-in user
+  // console.log(req.user);
   try {
-    const { chatId } = req.params;
+    // Check if the chat exists and if the user is a participant
+    const chat = await Chat.findById(chatId).populate("participants");
 
-    const messages = await Message.find({ chat: chatId }).populate('sender', 'username');
-    res.status(200).json({ success: true, data: messages });
+    if (!chat) {
+      console.log("chat not found!");
+      return res
+        .status(404)
+        .json({ success: false, message: "Chat not found" });
+    }
+
+    // Check if the user is a participant in the chat
+    console.log(userId, " userId inside getChatMessages");
+    if (
+      !chat.participants.some(
+        (participant) => participant._id.toString() === userId
+      )
+    ) {
+      console.log("access denied as this chat doesn'nt belong to the userId");
+      return res.status(403).json({ success: false, message: "Access denied" });
+    }
+
+    // Fetch messages for the chat
+    const messages = await Message.find({ chat: chatId })
+      .populate("sender", "username")
+      .exec();
+
+    // If no messages, return an empty array
+    if (!messages.length) {
+      console.log("no messages for this chat");
+      return res.status(202).json([]);
+    }
+    // Format the messages for the frontend
+
+    const formattedMessages = messages.map((message) => ({
+      _id: message._id,
+      content: message.content,
+      sender: message.sender.name,
+      isOutgoing: message.sender._id.equals(userId),
+      status: message.status,
+      updatedAt: message.updatedAt,
+    }));
+
+    console.log("formatted messages: ", { formattedMessages });
+
+    res.status(200).json({
+      success: true,
+      formattedMessages,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching messages', error });
+    console.log(error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching messages", error });
   }
 };
