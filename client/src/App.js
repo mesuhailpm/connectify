@@ -20,7 +20,8 @@ function App() {
   const dispatch = useDispatch();
   const {isAuthenticated, loading} = useSelector((state) => state.auth);
 
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const {error: chatError} = useSelector((state)=> state.chat)
+  const {error: authError} = useSelector((state)=> state.auth)
   useEffect(() => {
     dispatch(loadUserFromToken()); // Load the user from the token on app load
       }, [dispatch,loading]);
@@ -38,6 +39,7 @@ function App() {
         draggable
         pauseOnHover
       />
+       {chatError || authError && (<div className="fixed font-bold text-center text-2xl bg-yellow-500 p-2">{chatError + authError}</div>)}
       <Nav />
       <header className="bg-gray-800 p-4">
         <SignedInIndicator />
