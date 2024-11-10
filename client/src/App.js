@@ -14,6 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useEffect } from "react";
 import { loadUserFromToken } from "./actions/authActions";
 import SignedInIndicator from "./components/SignedIndicator";
+import About from "./containers/About";
 
 function App() {
   const dispatch = useDispatch();
@@ -54,6 +55,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/help" element={<Help />} />
+<Route path="/about" element={<About />} />
         </Routes>
       </main>
 

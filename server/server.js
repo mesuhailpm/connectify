@@ -21,6 +21,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/chats', require('./routes/chatRoutes'));
+app.use('/api/users', require ('./routes/userRoutes'))
 
 // WebSocket setup
 chatSocket(server);
