@@ -61,10 +61,11 @@ exports.login = async (req, res) => {
     }
     // Generate token and respond
     const token = signToken(user._id);
+    const {password: pswd, ...userWithoutPassword } = user.toObject(); // Exclude password from response
     res.status(200).json({
       success: true,
       token,
-      data: { user },
+      user:userWithoutPassword,
     });
   } catch (error) {
     console.log(error)
@@ -79,8 +80,9 @@ exports.logout = (req, res) => {
 
 // Get logged-in user's data
 exports.getMe = (req, res) => {
+  const {user} = req // req.user is set by the authMiddleware
   res.status(200).json({
     success: true,
-    data: req.user, // req.user is set by the authMiddleware
+    user, 
   });
 };

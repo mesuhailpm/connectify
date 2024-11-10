@@ -11,13 +11,13 @@ export const loadUserFromToken = () => async (dispatch) => {
     try {
       // Attach token to headers (assuming you use JWT and Bearer token)
       API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
+
       // Fetch the user's data (this can be from your /me or /profile endpoint)
-      const { data } = await API.get('/api/auth/me');
+      const { data: {user} } = await API.get('/api/auth/me');
 
       dispatch({
         type: AUTH_SUCCESS,
-        payload: { user: data.user, token },
+        payload: { user, token },
       });
     } catch (error) {
       dispatch({
@@ -26,31 +26,36 @@ export const loadUserFromToken = () => async (dispatch) => {
       });
       // Optionally, clear token if failed
       localStorage.removeItem('token');
+      localStorage.removeItem('userId');
     }
+  } else {
+    dispatch({
+      type: AUTH_FAILURE,
+      payload: { error: "Failed to authenticate" },
+    });
   }
 };
 
 //
 export const login = (credentials) => async (dispatch) => {
-  try {
+    try {
     // dispatch({ type: AUTH_REQUEST });
-    const datad = await API.post('/api/auth/login', credentials); // API endpoint for login
-
-    console.log(datad)
-    const { data } = await API.post('/api/auth/login', credentials); // API endpoint for login
-
+    const { data : {user, token} } = await API.post("/api/auth/login", credentials); // API endpoint for login  
     dispatch({
       type: AUTH_SUCCESS,
-      payload: { user: data.user, token: data.token },
+      payload: { user, token }, //data.data is object with _id, username, email, avatar, createdAt,
     });
 
     // Save token to localStorage if needed
-    localStorage.setItem('token', data.token);
+    localStorage.setItem('token', token);
+    localStorage.setItem("userId", user._id);
+    toast.success('Login Sucessfull!')
+
   } catch (error) {
 
     const errorMessage = error.response?.data?.message || 'Login failed';
 
-    
+
     dispatch({
       type: AUTH_FAILURE,
       payload: { error: error.response ? error.response.data.message : 'Login failed' },
@@ -60,30 +65,30 @@ export const login = (credentials) => async (dispatch) => {
 };
 
 export const signUp = (userData) => async (dispatch) => {
-    try {
-      dispatch({ type: AUTH_REQUEST });
+  try {
+    dispatch({ type: AUTH_REQUEST });
       console.log({userData})
-  
+
       const { data } = await API.post('/api/auth/signup', userData); // API endpoint for sign up
-  
-      dispatch({
-        type: AUTH_SUCCESS,
-        payload: { user: data.user, token: data.token },
-      });
-  
-      // Save token to localStorage if needed
+
+    dispatch({
+      type: AUTH_SUCCESS,
+      payload: { user: data.user, token: data.token },
+    });
+
+    // Save token to localStorage if needed
       localStorage.setItem('token', data.token);
-    } catch (error) {
+  } catch (error) {
       const errorMessage = error.response?.data?.message || 'Sign-up failed';
 
-      console.log(error)
-      dispatch({
-        type: AUTH_FAILURE,
+    console.log(error)
+    dispatch({
+      type: AUTH_FAILURE,
         payload: { error: errorMessage},
-      });
+    });
       toast.error(errorMessage)
-    }
-  };
+  }
+};
 
 export const logout = () => (dispatch) => {
   localStorage.removeItem("token");
