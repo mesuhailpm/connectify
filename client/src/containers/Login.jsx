@@ -13,12 +13,12 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(login({ email, password }));
+     dispatch(login({ email, password }));
   };
 
   if (isAuthenticated) {
     // Redirect to the home page after login
-    return <Navigate to="/" />;
+    return <Navigate to="/chats" />;
   }
 
   return (
