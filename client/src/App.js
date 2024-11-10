@@ -18,11 +18,12 @@ import About from "./containers/About";
 
 function App() {
   const dispatch = useDispatch();
+  const {isAuthenticated, loading} = useSelector((state) => state.auth);
 
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   useEffect(() => {
     dispatch(loadUserFromToken()); // Load the user from the token on app load
-  }, [dispatch]);
+      }, [dispatch,loading]);
 
   return (
     <div className="flex flex-col grow bg-gray-200 border-4 w-full min-h-dvh border-red-700 px-2">
@@ -49,7 +50,7 @@ function App() {
           <Route
             path="/chats"
             element={
-              isAuthenticated ? <Chats /> : <Navigate to={"/login"} replace />
+(!isAuthenticated && !loading) ? <Navigate to={"/login"} replace />: <Chats />
             }
           />
           <Route path="/signup" element={<SignUp />} />
