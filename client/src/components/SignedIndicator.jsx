@@ -42,7 +42,7 @@ const SignedInIndicator = () => {
         onClick={handleLogout} 
         className="text-red-400 hover:underline"
       >
-        Logout action
+        Logout
       </button>
     </div>
   );

@@ -86,6 +86,7 @@ export const signUp = (userData) => async (dispatch) => {
   };
 
 export const logout = () => (dispatch) => {
-  localStorage.removeItem('token');
+  localStorage.removeItem("token");
+  localStorage.removeItem("userId");
   dispatch({ type: LOGOUT });
 };
