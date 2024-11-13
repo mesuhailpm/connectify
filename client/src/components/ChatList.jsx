@@ -1,56 +1,65 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ChatCard from "./ChatCard";
+import { useDispatch, useSelector } from "react-redux";
+import { SELECT_CHAT } from "../constants/actionTypes";
+import SearchChats from "./SearchChats";
 
 const ChatList = () => {
-  const chats = [
-    {
-      id: 1,
-      contactName: "John Doe",
-      avatarUrl:
-        "https://gravatar.com/avatar/eb39b2bea731f88396134a0241bc19e8?s=400&d=robohash&r=x",
 
-      lastMessage: "Hey, how are you?",
-      isRead: false,
-      isOutgoing: true, // Last message was sent by the user
-      messageStatus: "delivered",
-    },
-    {
-      id: 2,
-      contactName: "Jane Smith",
-      avatarUrl:
-        "https://gravatar.com/avatar/eb39b2bea731f88396134a0241bc19e8?s=400&d=identicon&r=x",
-      lastMessage: "See you later!",
-      isRead: true,
-      isOutgoing: false, // Last message was received from the other person
-    },
-  ];
 
+  const { messages, selectedChat, sendingMessage } = useSelector(
+    (state) => state.chat
+  );
+
+  const dispatch = useDispatch();
+  const chatState = useSelector((state) => state.chat);
+
+
+  const { chats, error, loading } = chatState;
+  console.log(chats);
+
+  useEffect(() => {
+    if (chats.length && !selectedChat) {
+      const latest = chats.sort((a, b) => {
+        return a.updatedAt - b.updatedAt;
+      })[0];
+      console.log("this useEffect is selecting ", latest);
+      dispatch({ type: SELECT_CHAT, payload: latest });
+    }
+  }, [loading]);
+
+  const onClick = (chat) => {
+    //dispatch SELECT_Chat action with a check if chat is not selected already
+    if (chat._id !== selectedChat?._id) {
+      // alert(chatId);
+      console.log(chat, " chat to be selected");
+      dispatch({ type: SELECT_CHAT, payload: chat });
+    }
+  };
+  console.log(chatState.chats);
   return (
-    <div className="border-2 border-black h-full flex-grow">
-      {chats.map((chat) => (
+    <div className="cht-list flex w-3/12 overflow-y-auto flex-col justify-start border-2 bg-black border-black flex-grow hide-scrollbar">
+      <SearchChats
+        isNew={!chatState.chats.length}
+      />
+      {chatState.chatsLoading && (
+        <p className="text-center text-blue-500 text-xl">
+          Loading your chats...
+        </p>
+      )}
+      {chatState.chats.map((chat) => (
         <ChatCard
-          key={chat.id}
-          avatarUrl={chat.avatarUrl}
-          contactName={chat.contactName}
+          key={chat._id}
+          id={chat._id}
+          avatar={chat.avatar}
+          username={chat.username}
           isOutgoing={chat.isOutgoing}
           lastMessage={chat.lastMessage}
           isRead={false}
-          onClick={() => alert("clicked")}
+          onClick={() => onClick(chat)}
           messageStatus={chat.messageStatus}
-          isO
         />
       ))}
-      <ChatCard
-        contactName={"name"}
-        avatarUrl={
-          "https://gravatar.com/avatar/eb39b2bea731f88396134a0241bc19e8?s=400&d=robohash&r=x"
-        }
-        lastMessage="last Message"
-        isRead={false}
-        onClick={() => alert("clicked")}
-        messageStatus="delivered"
-        isOutgoing={true}
-      />
     </div>
   );
 };

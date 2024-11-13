@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setActiveChat, fetchChatMessages } from "../actions/chatActions";
 import { FETCH_MORE_CHAT_SUCCESS } from "../constants/actionTypes";
 
-const SearchChats = ({ setSelectedUser, isNew = false  }) => {
+const SearchChats = ({ isNew = false  }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -22,7 +22,6 @@ const SearchChats = ({ setSelectedUser, isNew = false  }) => {
     if(!authState.user._id) {alert(' no user in authState; user is: '+authState.user) ; return};
 
     if(!user) {alert('no user selected, user is: '+ user); return}
-    setSelectedUser(user);
     console.log(user, ' is user clicked and selected(from searchChats)')
     
     console.log({ participants: [user._id, authState.user._id] });
