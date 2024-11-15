@@ -2,7 +2,7 @@ import React from 'react'
 
 const Footer = () => {
   return (
-    <div className='text-center'>All Rights Reserved © {new Date().getFullYear()}</div>
+    <div style={{flexBasis:'2%'}} className='text-center bg-blac'>All Rights Reserved © {new Date().getFullYear()}</div>
   )
 }
 

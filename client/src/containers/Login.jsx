@@ -22,15 +22,15 @@ const Login = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-md rounded-md">
-        <h2 className="text-center text-2xl font-bold text-gray-900">Login to your account</h2>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 w-full">
+      <div className="w-full max-w-md p-8 space-y-6  shadow-md bg-black text-white rounded-md">
+        <h2 className="text-center text-2xl font-bold text-gray-100">Login to your account</h2>
 
         {error && <p className="text-red-500 text-center">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-200">
               Email
             </label>
             <input
@@ -45,7 +45,7 @@ const Login = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-200">
               Password
             </label>
             <input

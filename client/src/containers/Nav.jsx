@@ -6,7 +6,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 
 export const Nav = () => {
-  const navigate = useNavigate();
   return (
     <nav className="flex w-full justify-between items-center font-bold h-[30px]">
       <Link className="flex" to={"/"}>
