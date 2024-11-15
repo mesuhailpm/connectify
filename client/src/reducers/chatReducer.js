@@ -5,7 +5,8 @@ const initialState = {
     selectedChat: null,         // The currently selected chat
     messages: [],               // Messages for the selected chat
     loading: false,             // Loading status for async requests
-    error: null,                // Errors when fetching/sending messages
+    chatsLoading: false, // Loading status for fetching chats
+  error: null, // Errors when fetching/sending messages
     sendingMessage: false,      // Status for when a message is being sent
   };
   
@@ -29,8 +30,8 @@ const initialState = {
       case FETCH_CHATS_FAILURE:
         return {
           ...state,
-          loading: false,
-          error: action.payload.error,
+        chatsLoading: false,
+        error: action.payload,
         };
   
       case SELECT_CHAT:
