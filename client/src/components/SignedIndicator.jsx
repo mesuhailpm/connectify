@@ -26,16 +26,13 @@ const SignedInIndicator = () => {
       {user?.avatar && (
         <img 
           src={user.avatar} 
-          alt={user.name} 
+          alt={user.username} 
           className="h-8 w-8 rounded-full"
         />
       )}
-      <span>Welcome, {user?.name || 'User'}!</span>
+      <span>Welcome, {user?.username || 'User'}!</span>
       <Link to="/profile" className="text-blue-300 hover:underline">
         Profile
-      </Link>
-      <Link to="/logout" className="text-red-400 hover:underline">
-        Logout
       </Link>
 
       <button 
