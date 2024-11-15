@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { MongoServerSelectionError } = require('mongodb'); // Import MongoServerSelectionError
+
 
 exports.protect = async (req, res, next) => {
   let token;
@@ -20,7 +22,10 @@ exports.protect = async (req, res, next) => {
 
     console.log('error inside middleware', error)
     if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'Token expired' });
+      return res.status(401).json({ message: 'Session expired' });
+    }
+    if (error instanceof MongoServerSelectionError) {
+      return res.status(503).json({ message: 'Service Unavailable' }); 
     }
     if(error.name === 'JsonWebTokenError'){
       return res.status(400).json( { message: 'Token malformed' })
