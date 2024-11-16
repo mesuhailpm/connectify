@@ -39,7 +39,12 @@ function App() {
         draggable
         pauseOnHover
       />
-       {chatError || authError && (<div className="fixed font-bold text-center text-2xl bg-yellow-500 p-2">{chatError + authError}</div>)}
+      {chatError ||
+        (authError && (
+          <div className="fixed font-bold text-center text-2xl bg-yellow-500 p-2">
+            {chatError + authError}
+          </div>
+        ))}
       <Nav />
       <header className="bg-gray-800 p-4">
         <SignedInIndicator />
@@ -52,10 +57,13 @@ function App() {
           <Route
             path="/chats"
             element={
-(!isAuthenticated && !loading) ? <Navigate to={"/login"} replace />: <Chats />
+              !isAuthenticated && !loading ? (
+                <Navigate to={"/login"} replace />
+              ) : (
+                <Chats />
+              )
             }
           />
-          <Route path="/signup" element={<SignUp />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/help" element={<Help />} />
 <Route path="/about" element={<About />} />
