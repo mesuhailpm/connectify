@@ -9,11 +9,13 @@ import {
   FaUsers,
   FaPaperclip,
   FaImage,
-  } from "react-icons/fa";
-
+} from "react-icons/fa";
 
 import ChatMenuButton from "../components/ChatMenuButton";
+import { useSelector } from "react-redux";
+
 const ChatMenu = () => {
+  const { selectedChat } = useSelector((state) => state.chat);
   const handleMuteNotifications = () => {
     console.log("Notifications muted");
   };
@@ -46,17 +48,29 @@ const ChatMenu = () => {
     console.log("File shared");
   };
 
+  if (!selectedChat)
+    return (
+      <div className="chat-menu text-center w-3/12 flex flex-grow items-center h-full justify-center p-1 border-2 border-black font-bold">
+        No Chat Selected
+      </div>
+    );
+
   return (
-    <div className="border-2 flex flex-col border-black h-full flex-grow p-1 gap-1">
-      <h2 className="text-lg font-bold mb-2">Chat Options</h2>
+    <div className="chat-menu border-2 overflow-y-auto hide-scrollbar flex w-3/12 flex-col border-black h-full flex-grow p-1 gap-1">
+      <h2 className="text-lg text-center font-bold mb-2">Chat Options</h2>
+      <h2 className="text-teal-700 text-lg text-center font-bold mb-2">
+        {selectedChat.username}
+      </h2>
       <div className="profile-info text-center mb-4">
         <img
-          src="https://robohash.org/595bab3b3590874aaab11d99b1237e1f?set=set4&bgset=&size=400x400"
+          src={selectedChat.avatar}
           alt="Profile"
           className="w-16 h-16 rounded-full mx-auto mb-2"
         />
-        <h3 className="text-xl">Contact Name</h3>
-        <p className="text-green-">Status: <span className="font-semibold text-lime-500" >Online</span></p>
+        <h3 className="text-xl">{selectedChat.name}</h3>
+        <p className="text-green-">
+          Status: <span className="font-semibold text-lime-500">Online</span>
+        </p>
       </div>
       <input
         type="text"
