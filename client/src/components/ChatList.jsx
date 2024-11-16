@@ -40,7 +40,7 @@ const ChatList = () => {
   return (
     <div className="cht-list flex w-3/12 overflow-y-auto flex-col justify-start border-2 bg-black border-black flex-grow hide-scrollbar">
       <SearchChats
-        isNew={!chatState.chats.length}
+        isNew={!chatState.chats.length && !chatState.error}
       />
       {chatState.chatsLoading && (
         <p className="text-center text-blue-500 text-xl">
