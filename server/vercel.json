@@ -12,6 +12,5 @@
       "src": "/(.*)",
       "dest": "/"
     }
-  ],
-  "comment":"This file added just to make it feasible to be deployed into Vercel"
+  ]
 }
