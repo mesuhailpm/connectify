@@ -53,12 +53,12 @@ export const login = (credentials) => async (dispatch) => {
 
   } catch (error) {
 
-    const errorMessage = error.response?.data?.message || 'Login failed';
+    const errorMessage = error.message === "Network Error" ? error.message : error.response?.data?.message || 'Login failed';
 
 
     dispatch({
       type: AUTH_FAILURE,
-      payload: { error: error.response ? error.response.data.message : 'Login failed' },
+      payload: error,
     });
     toast.error(errorMessage)
   }
