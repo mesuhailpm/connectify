@@ -31,6 +31,7 @@ API.interceptors.response.use(
         // Token expired, handle the situation here
         // For example, you can log the user out, clear the token, and redirect them
         localStorage.removeItem("token"); // Clear the expired token
+        localStorage.removeItem("userId"); // Clear the userId
         window.location.href = "/login"; // Redirect to login page
         return Promise.reject(new Error("Token expired, please log in again."));
       }
