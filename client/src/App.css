@@ -1,12 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-.App {
-  text-align: center;
-}
+*/
 input{
   outline: none;
+  color: black;
 }
 
 @keyframes spin {
@@ -14,6 +12,11 @@ input{
     transform: rotate(360deg);
   }
 }
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; 
+}
+
 
 
 .loader {
