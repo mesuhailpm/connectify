@@ -38,13 +38,13 @@ const ChatList = () => {
   };
   console.log(chatState.chats);
   return (
-    <div className="cht-list flex w-3/12 overflow-y-auto flex-col justify-start border-2 bg-black border-black flex-grow hide-scrollbar">
+    <div className="cht-list flex w-3/12 overflow-y-auto flex-col justify-start border-2 bg-black border-black hide-scrollbar overflow-x-hidden">
       <SearchChats
         isNew={!chatState.chats.length && !chatState.error}
       />
       {chatState.chatsLoading && (
         <p className="text-center text-blue-500 text-xl">
-          Loading your chats...
+          Fetching your chats...
         </p>
       )}
       {chatState.chats.map((chat) => (
@@ -54,7 +54,7 @@ const ChatList = () => {
           avatar={chat.avatar}
           username={chat.username}
           isOutgoing={chat.isOutgoing}
-          lastMessage={chat.lastMessage}
+          lastMessage={chat.lastMessage.substring(0, 20)}
           isRead={false}
           onClick={() => onClick(chat)}
           messageStatus={chat.messageStatus}

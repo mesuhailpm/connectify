@@ -18,16 +18,16 @@ import About from "./containers/About";
 
 function App() {
   const dispatch = useDispatch();
-  const {isAuthenticated, loading} = useSelector((state) => state.auth);
+  const { isAuthenticated, loading } = useSelector((state) => state.auth);
 
-  const {error: chatError} = useSelector((state)=> state.chat)
-  const {error: authError} = useSelector((state)=> state.auth)
+  const { error: chatError } = useSelector((state) => state.chat);
+  const { error: authError } = useSelector((state) => state.auth);
   useEffect(() => {
     dispatch(loadUserFromToken()); // Load the user from the token on app load
-      }, [dispatch,loading]);
+  }, [dispatch, loading]);
 
   return (
-    <div className="flex flex-col grow bg-gray-200 border-4 w-full min-h-dvh border-red-700 px-2">
+    <div className="app relative flex flex-col bg-gray-200 border-4 w-full overflow-hidden border-red-700 px-2 h-full">
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -46,11 +46,11 @@ function App() {
           </div>
         ))}
       <Nav />
-      <header className="bg-gray-800 p-4">
+      <header className="bg-gray-800  p-4 h-[80px]" >
         <SignedInIndicator />
       </header>
 
-      <main className="w-full min-h-dvh">
+      <main className="flex grow max-h-full border-2 overflow-scroll hide-scrollbar">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -66,7 +66,7 @@ function App() {
           />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/help" element={<Help />} />
-<Route path="/about" element={<About />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </main>
 

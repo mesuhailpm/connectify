@@ -7,7 +7,7 @@ import { useLocation } from "react-router-dom";
 
 export const Nav = () => {
   return (
-    <nav className="flex w-full justify-between items-center font-bold h-[30px]">
+    <nav className="flex w-full justify-between items-center font-bold  min-h-[30px]">
       <Link className="flex" to={"/"}>
         <img src={logo} width={30} alt="Logo" />
         <h1>Connectify</h1>

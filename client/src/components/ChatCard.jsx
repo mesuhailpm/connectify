@@ -21,7 +21,7 @@ function ChatCard({
 
   return (
     <div
-      className={`chat-card flex items-center p-4 border-b  rounded-md m-1 border-gray-700  cursor-pointer 
+      className={`chat-card w-full flex items-center p-4 border-b overflow-x-hidden text-wrap rounded-md m-1 border-gray-700  cursor-pointer 
         ${isRead ? "bg-gray-800 " : "bg-gray-700 "} ${
         selectedChat?._id.toString() === id.toString()
           ? "border-yellow-400 font-semibold"
