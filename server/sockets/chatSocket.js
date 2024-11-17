@@ -10,6 +10,7 @@ const chatSocket = (server) => {
       methods: ["GET", "POST"],
       credentials: true, // Allow cookies if needed
     },
+    tranports: ["websocket", "polling"], // Use WebSocket for better performance
   });
 
   io.on("connection", (socket) => {
