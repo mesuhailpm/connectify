@@ -11,7 +11,7 @@ const app = express();
 const server = http.createServer(app);
 
 const corsOptions = {
-  origin: 'https://connectify-kappa-ten.vercel.app', // Frontend URL
+  origin: "*", // Frontend URL
   methods: ['GET', 'POST'],
   credentials: true,
 };

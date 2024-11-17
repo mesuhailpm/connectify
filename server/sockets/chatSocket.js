@@ -6,7 +6,7 @@ const { default: mongoose } = require("mongoose");
 const chatSocket = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: "https://connectify-kappa-ten.vercel.app", // Your frontend URL
+      origin: "*", // Your frontend URL
       methods: ["GET", "POST"],
       credentials: true, // Allow cookies if needed
     },
