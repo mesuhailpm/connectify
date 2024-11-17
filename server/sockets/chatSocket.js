@@ -6,7 +6,7 @@ const { default: mongoose } = require("mongoose");
 const chatSocket = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: "*", // Your frontend URL
+      origin: "http://localhost:3000", // Your frontend URL
       methods: ["GET", "POST"],
       credentials: true, // Allow cookies if needed
     },
