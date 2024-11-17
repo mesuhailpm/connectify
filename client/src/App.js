@@ -76,3 +76,10 @@ function App() {
 }
 
 export default App;
+
+/*
+I want my app (div with #root id) to take the width and height of the screen that means that there is no scroll within the app. If the charge cards are more than the screen can include the score should be there, Also if there are messages more than what the Visible space can contain, we should be able to scroll, This scroll should not affect the chat input and the chat boot should be In the bottom side of that chatPanel. As per my current code if there are messages in the chat panel I am not even able to see the chat input, I can see the input in the correct position if there are no messages. Also irrespective of whether messages are there or not the Nav and headers are not anywhere, Now and headers are visible only when there is nuochat selected
+
+
+
+*/

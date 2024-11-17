@@ -6,7 +6,9 @@ const { default: mongoose } = require("mongoose");
 const chatSocket = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: "https://connectify-kappa-ten.vercel.app", // Your frontend URL
+      methods: ["GET", "POST"],
+      credentials: true, // Allow cookies if needed
     },
   });
 
@@ -19,12 +21,11 @@ const chatSocket = (server) => {
         chat: chatId,
         sender: userId,
         content: messageText,
-        status:'sent',
+        status: "sent",
       });
       try {
-
         const mongooseSession = await mongoose.startSession();
-        mongooseSession.startTransaction()
+        mongooseSession.startTransaction();
         try {
           await newMessage.save({ session: mongooseSession });
 
@@ -36,8 +37,7 @@ const chatSocket = (server) => {
           await mongooseSession.commitTransaction();
         } catch (error) {
           await mongooseSession.abortTransaction();
-          throw Error('Error saving the message on backend...'+error.message)
-
+          throw Error("Error saving the message on backend..." + error.message);
         } finally {
           await mongooseSession.endSession();
         }

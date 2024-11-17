@@ -10,7 +10,14 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-app.use(cors())
+const corsOptions = {
+  origin: 'https://connectify-kappa-ten.vercel.app', // Frontend URL
+  methods: ['GET', 'POST'],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
 
 // MongoDB connection
 connectDB();

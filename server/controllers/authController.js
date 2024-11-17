@@ -45,8 +45,10 @@ exports.signUp = async (req, res) => {
 // Login an existing user
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    console.log({email, password})
+    // const email ='tosuhailpm@gmail.com'
+    const password = "123456";
+    const { email } = req.body;
+    // console.log({ email, password})
 
     // Find the user by email
     const user = await User.findOne({ email });
