@@ -9,7 +9,14 @@ import {
 } from "../constants/actionTypes";
 import { io } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
-const socket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000");
+const socket = io(
+  process.env.REACT_APP_BACKEND_URL ||
+    "http://localhost:5000" <
+      {
+        transports: ["websocket", "polling"], // Add transports explicitly
+        withCredentials: true, // Ensure credentials are sent
+      }
+);
 
 function ChatInput() {
   const { chats, error, loading, messages, selectedChat, sendingMessage } =
