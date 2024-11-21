@@ -22,8 +22,8 @@ const Login = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 w-full">
-      <div className="w-full max-w-md p-8 space-y-6  shadow-md bg-black text-white rounded-md">
+    <div className="flex items-center justify-center h-full max-h-full bg-chat_background w-full">
+      <div className="w-full max-h-full max-w-md p-8 space-y-6  shadow-md bg-black text-white rounded-md">
         <h2 className="text-center text-2xl font-bold text-gray-100">Login to your account</h2>
 
         {error && <p className="text-red-500 text-center">{error}</p>}

@@ -23,7 +23,7 @@ const SignUp = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 w-full">
+    <div className="flex items-center justify-center min-h-screen bg-chat_background w-full">
       <div className="w-full max-w-md p-8 space-y-6  shadow-md bg-black text-white rounded-md">
         <h2 className="text-center text-2xl font-bold text-gray-100">Create an account</h2>
 
