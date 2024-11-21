@@ -27,7 +27,7 @@ function App() {
   }, [dispatch, loading]);
 
   return (
-    <div className="app relative flex flex-col bg-gray-200 border-4 w-full overflow-hidden border-red-700 px-2 h-full">
+    <div className="app relative flex flex-col bg-primary/50 border-4 w-full overflow-hidden border-red-700 px-2 h-full">
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -46,11 +46,11 @@ function App() {
           </div>
         ))}
       <Nav />
-      <header className="bg-gray-800  p-4 h-[80px]" >
+      <header className="bg-primary  p-4 h-[80px]" >
         <SignedInIndicator />
       </header>
 
-      <main className="flex grow max-h-full border-2 overflow-scroll hide-scrollbar">
+      <main className="flex grow max-h-full overflow-scroll hide-scrollbar">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />

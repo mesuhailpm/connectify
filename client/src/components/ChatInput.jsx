@@ -192,7 +192,7 @@ function ChatInput() {
   };
 
   return (
-    <div className="chat-input flex items-center h-16 p-2 bg-gray-800 border-t border-gray-600">
+    <div className="chat-input flex items-center h-16 p-2 bg-black/80 border-t border-gray-600">
       <input
         ref={chatInputRef}
         autoFocus
@@ -201,7 +201,7 @@ function ChatInput() {
         value={newMessage}
         onChange={(e) => setNewMessage(e.target.value)}
         onKeyPress={handleKeyPress}
-        className="flex-grow p-2 rounded-md bg-gray-700 text-white"
+        className="flex-grow p-2 rounded-md bg-primary text-white placeholder:text-white/50"
         disabled={isSending} // Disable input while sending
       />
       <button

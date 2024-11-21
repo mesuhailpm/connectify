@@ -1,8 +1,8 @@
 // src/components/SignedInIndicator.js
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import { logout } from '../actions/authActions';
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { logout } from "../actions/authActions";
 
 const SignedInIndicator = () => {
     const dispatch = useDispatch()
@@ -18,11 +18,34 @@ const SignedInIndicator = () => {
 
 
   if (!isAuthenticated) {
-    return null; // Don't show the indicator if the user isn't signed in
+    return (
+      <div className="flex justify-center items-center w-full text-white">
+        <p>
+          {`You have been missing. `}{" "}
+          <span>
+            <Link
+              to="/login"
+              className="text-blue-400 text-center hover:underline"
+            >
+              Login
+            </Link>
+          </span>
+          {` into your account if you are a member, or `}
+          <span>
+            <Link
+              to="/signup"
+              className="text-blue-400 text-center hover:underline"
+            >
+              Create one
+            </Link>
+          </span>
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div className="flex items-center space-x-4 p-2 bg-gray-700 text-white rounded-lg">
+    <div className="flex items-center space-x-4 p-2 bg-gradient-to-br from-secondary border-2  to-secondary  via-surface/40 border-secondary text-white rounded-lg">
       {user?.avatar && (
         <img 
           src={user.avatar} 
@@ -30,15 +53,12 @@ const SignedInIndicator = () => {
           className="h-8 w-8 rounded-full"
         />
       )}
-      <span>Welcome, {user?.username || 'User'}!</span>
-      <Link to="/profile" className="text-blue-300 hover:underline">
+      <span className="font-bold">Welcome, {user?.username || 'User'}!</span>
+      <Link to="/profile" className="text-blue-300 font-bold hover:underline">
         Profile
       </Link>
 
-      <button 
-        onClick={handleLogout} 
-        className="text-red-400 hover:underline"
-      >
+      <button onClick={handleLogout} className="text-danger/60 font-bold hover:underline">
         Logout
       </button>
     </div>

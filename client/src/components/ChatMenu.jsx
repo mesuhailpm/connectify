@@ -50,15 +50,15 @@ const ChatMenu = () => {
 
   if (!selectedChat)
     return (
-      <div className="chat-menu text-center w-3/12 flex flex-grow items-center h-full justify-center p-1 border-2 border-black font-bold">
+      <div className="chat-menu text-center w-3/12 flex flex-grow items-center h-full justify-center p-1 border-black font-bold">
         No Chat Selected
       </div>
     );
 
   return (
-    <div className="chat-menu border-2 overflow-y-auto hide-scrollbar flex w-3/12 flex-col border-black h-full flex-grow p-1 gap-1">
+    <div className="chat-menu bg-black overflow-y-auto hide-scrollbar flex w-3/12 flex-col h-full flex-grow p-1 gap-1">
       <h2 className="text-lg text-center font-bold mb-2">Chat Options</h2>
-      <h2 className="text-teal-700 text-lg text-center font-bold mb-2">
+      <h2 className="text-teal-300 text-lg text-center font-bold mb-2">
         {selectedChat.username}
       </h2>
       <div className="profile-info text-center mb-4">
@@ -68,61 +68,61 @@ const ChatMenu = () => {
           className="w-16 h-16 rounded-full mx-auto mb-2"
         />
         <h3 className="text-xl">{selectedChat.name}</h3>
-        <p className="text-green-">
+        <p className="text-green-100">
           Status: <span className="font-semibold text-lime-500">Online</span>
         </p>
       </div>
       <input
         type="text"
         placeholder="Search messages..."
-        className="p-2 mb-4 w-full rounded-md bg-gray-700"
+        className="p-2 mb-4 w-full rounded-md bg-gray-300 placeholder:text-gray-500"
       />
       <ChatMenuButton
         label="Mute Notifications"
         icon={<FaBell />}
-        style="bg-gray-700"
+        style="bg-primary"
         onClick={handleMuteNotifications}
       />
       <ChatMenuButton
         label="Block User"
         icon={<FaUserSlash />}
-        style="bg-gray-700"
+        style="bg-primary"
         onClick={handleBlockUser}
       />
       <ChatMenuButton
         label="Clear Chat History"
         icon={<FaTrash />}
-        style="bg-gray-700"
+        style="bg-primary"
         onClick={handleClearChatHistory}
       />
       <ChatMenuButton
         label="Export Chat"
         icon={<FaFileDownload />}
-        style="bg-gray-700"
+        style="bg-primary"
         onClick={handleExportChat}
       />
       <ChatMenuButton
         label="Report User"
         icon={<FaFlag />}
-        style="bg-gray-700"
+        style="bg-primary"
         onClick={handleReportUser}
       />
       <ChatMenuButton
         label="Create Group Chat"
         icon={<FaUsers />}
-        style="bg-gray-700"
+        style="bg-primary"
         onClick={handleCreateGroupChat}
       />
       <ChatMenuButton
         label="Pin Important Messages"
         icon={<FaPaperclip />}
-        style="bg-gray-700"
+        style="bg-primary"
         onClick={handlePinMessages}
       />
       <ChatMenuButton
         label="Share File"
         icon={<FaImage />}
-        style="bg-gray-700"
+        style="bg-primary"
         onClick={handleShareFile}
       />
       <h3 className="text-lg font-semibold mt-4">Recent Media</h3>

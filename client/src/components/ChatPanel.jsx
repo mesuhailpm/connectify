@@ -46,7 +46,7 @@ const ChatPanel = () => {
   return (
     <div className="chat-panel flex flex-col min-h-full flex-grow"  style={{ flexBasis: "60%" }}>
       <div
-        className="chat-message-container grow bg-slate-300  overflow-y-auto hide-scrollbar border-black p-4 "
+        className="chat-message-container grow bg-chat_background  overflow-y-auto hide-scrollbar border-black p-4 "
         
       >
         {Object.keys(groupedMessages).length ? (
@@ -54,7 +54,7 @@ const ChatPanel = () => {
             .sort((a, b) => a - b)
             .map((date) => (
               <div key={date} className="date-group flex flex-col gap-1">
-                <h3 className="date-header text-center text-gray-500 text-lg m-3">
+                <h3 className="date-header text-center text-gray-200 text-lg m-3">
                   {date}
                 </h3>{" "}
                 {/* Date header */}
@@ -71,7 +71,7 @@ const ChatPanel = () => {
             ))
         ) : loading ? (
           <div className="absolute bg-blue-500/5 w-full h-full text-lime-600 flex items-center justify-center top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2">
-            <FaCircle className="animate-ping" />
+            <FaCircle className="text-orange-500 animate-ping" />
           </div>
         ) : error ? (
           <>{error}</>
