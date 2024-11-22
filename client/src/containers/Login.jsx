@@ -3,17 +3,29 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../actions/authActions'; // Import your login action
 import { Navigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const dispatch = useDispatch();
   const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
 
   const [email, setEmail] = useState('');
+  const [formLoading, setFormLoading] = useState(false);
+
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-     dispatch(login({ email, password }));
+    try {
+      setFormLoading(true)
+
+     await dispatch(login({ email, password }));
+    } catch (error) {
+      toast.error('couldn\'t login!')
+    } finally{
+      setFormLoading( false )
+    }
+
   };
 
   if (isAuthenticated) {
@@ -62,11 +74,11 @@ const Login = () => {
           <button
             type="submit"
             className={`w-full px-4 py-2 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
+              formLoading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
-            disabled={loading}
+            disabled={formLoading}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {formLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
