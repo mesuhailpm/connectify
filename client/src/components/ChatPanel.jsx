@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,10 +7,17 @@ import { FaCircle } from "react-icons/fa";
 
 const ChatPanel = () => {
   const chatState = useSelector((state) => state.chat);
-
+  
+  const chatContainerRef = useRef(null)
   const { getChatMessagesError, loading, messages, selectedChat } = chatState;
   console.log(chatState, " messages from chatState");
   const dispatch = useDispatch();
+  useEffect(()=>{
+    if(chatContainerRef ){
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+
+  },[messages])
 
   useEffect(() => {
     const fetchMessagesByChat = (chatId) => dispatch(fetchChatMessages(chatId));
@@ -46,6 +53,7 @@ const ChatPanel = () => {
   return (
     <div className="chat-panel flex flex-col min-h-full flex-grow"  style={{ flexBasis: "60%" }}>
       <div
+        ref={chatContainerRef}
         className="chat-message-container grow bg-chat_background  overflow-y-auto hide-scrollbar border-black p-4 "
         
       >

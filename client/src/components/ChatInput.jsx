@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import mongoose, { Types } from "mongoose";
 import { GrSend } from "react-icons/gr";
 import { toast } from "react-toastify";
+import outgoingTone from  '../assets/media/ping.mp3'
+import incomingTone from  '../assets/media/ding.mp3'
 import {
   SEND_MESSAGE_SUCCESS,
   SEND_MESSAGE_FAILURE,
@@ -71,6 +73,8 @@ function ChatInput() {
       const messageForState = convertMessage();
       // You can update the message state here, e.g., push to messages
       dispatch({ type: RECEIVE_MESSAGE, payload: messageForState });
+      const audio = new Audio(incomingTone);
+      audio.play();
     });
 
     return () => {
@@ -211,6 +215,8 @@ function ChatInput() {
             type: SEND_MESSAGE_SUCCESS,
             payload: messageForState(),
           });
+          const audio = new Audio(outgoingTone);
+          audio.play();
           setNewMessage(""); // Clear the input after sending
         });
       } catch (error) {
