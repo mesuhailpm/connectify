@@ -6,6 +6,7 @@ import {
   SEND_MESSAGE_SUCCESS,
   SEND_MESSAGE_FAILURE,
   SEND_MESSAGE_REQUEST,
+  RECEIVE_MESSAGE,
 } from "../constants/actionTypes";
 import { io } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,30 +26,42 @@ function ChatInput() {
   console.log(randomId)
 
   useEffect(() => {
-    setRandomId(new Types.ObjectId().toString());
-  }, [isSending]);
-
+    if (user && user._id) {
+      socket.emit("registerUser", user._id.toString());
+    }
+  }, [user]);
 
   useEffect(() => {
+    setRandomId(new Types.ObjectId().toString());
     chatInputRef.current.focus();
   }, [isSending]);
 
   useEffect(() => {
     // Listen for incoming messages from the server
     socket.on("receiveMessage", (message) => {
+      const {
+        chat,
+        content,
+        sender,
+        status,
+        updatedAt,
+        createdAt,
+        readBy,
+        _id,
+      } = message;
       console.log("Received a new message from server:", message);
 
       const convertMessage = () => {
         try {
           return {
-            chat: selectedChat._id,
-            content: newMessage,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            readBy: [],
-            sender: user._id.toString(),
-            status: "sent",
-            _id: message._id,
+            chat,
+            content,
+            createdAt,
+            updatedAt,
+            readBy,
+            sender,
+            status,
+            _id,
           };
         } catch (error) {
           console.log("unable to convert message to state", error);
@@ -57,7 +70,7 @@ function ChatInput() {
       };
       const messageForState = convertMessage();
       // You can update the message state here, e.g., push to messages
-      dispatch({ type: SEND_MESSAGE_SUCCESS, payload: messageForState });
+      dispatch({ type: RECEIVE_MESSAGE, payload: messageForState });
     });
 
     return () => {
@@ -86,7 +99,6 @@ function ChatInput() {
 
     setIsSending(true);
 
-    
     try {
       const newMessagaeObj = {
         _id: randomId,
@@ -102,7 +114,7 @@ function ChatInput() {
         sender: user._id.toString(),
         status: "sending",
       };
-      
+
       // Emit the new message to the server
       console.log(mongoose.Types.ObjectId.isValid(randomId), ' from valid'); // Check if the ID is valid
       console.log(randomId)
@@ -119,8 +131,9 @@ function ChatInput() {
         content: newMessage,
         userId: localStorage.getItem("userId"), // Ensure you pass the correct user ID
         status: "sending",
+        recipient: selectedChat.recipient,
       });
-      
+
       const messageForState = () => {
         const {
           createdAt,
@@ -158,7 +171,7 @@ function ChatInput() {
         toast.error("No internet connection. Please check your network.", {
           autoClose: 500,
         });
-        setNewMessage("")
+        setNewMessage("");
         return;
       }
       try {

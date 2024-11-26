@@ -10,6 +10,7 @@ import {
   SEND_MESSAGE_FAILURE,
   SEND_MESSAGE_REQUEST,
   SEND_MESSAGE_SUCCESS,
+  RECEIVE_MESSAGE,
   UPDATE_MESSAGE_STATUS,
   FETCH_CHAT_MESSAGES_SUCCESS,
   FETCH_CHAT_MESSAGES_FAILURE,
@@ -129,6 +130,13 @@ const chatReducer = (state = initialState, action) => {
         messages: [...state.messages.map((msg)=>msg._id === action.payload._id ? {...msg, status: 'sent'}: msg)], // Add the new message to the chat
       };
 
+      
+      case RECEIVE_MESSAGE:
+        return {
+          ...state,
+          messages: [...state.messages, action.payload], // Add the new message to the chat
+        };
+  
     case SEND_MESSAGE_FAILURE:
       return {
         ...state,

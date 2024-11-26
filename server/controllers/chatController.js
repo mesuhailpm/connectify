@@ -3,7 +3,7 @@ const Message = require("../models/Message");
 
 // Get all chat threads for the logged-in user
 exports.getChats = async (req, res) => {
-  console.log("will fetch chats");
+  // console.log("will fetch chats");
   try {
     console.log(req.user._id.toString(),' is user ID of request will search for the chats where this is participant')
     const chats = await Chat.find({ participants: req.user._id.toString() })
@@ -16,7 +16,7 @@ exports.getChats = async (req, res) => {
         select: "content sender status readBy",
       })
       .exec();
-    console.log(chats, "chats");
+    // console.log(chats, "chats");
 
     const formattedChats = chats.map((chat) => {
       const otherParticipant = chat.participants.find(
@@ -33,21 +33,23 @@ exports.getChats = async (req, res) => {
         ? lastMessage.readBy.includes(req.user._id)
         : false;
       const messageStatus = isRead ? "read" : isOutgoing ? "sent" : "received";
-      console.log("i will return ", {
-        _id: chat._id,
-        username: otherParticipant.username,
-        avatar: otherParticipant.avatar,
-        lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
-        isOutgoing,
-        isRead,
-        messageStatus,
-        updatedAt: chat.updatedAt,
-      });
+      // console.log("i will return ", {
+      //   _id: chat._id,
+      //   recipient: otherParticipant._id,
+      //   username: otherParticipant.username,
+      //   avatar: otherParticipant.avatar,
+      //   lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
+      //   isOutgoing,
+      //   isRead,
+      //   messageStatus,
+      //   updatedAt: chat.updatedAt,
+      // });
 
       return {
         _id: chat._id,
         username: otherParticipant.username,
         avatar: otherParticipant.avatar,
+        recipient: otherParticipant._id,
         lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
         isOutgoing,
         isRead,
@@ -122,16 +124,16 @@ exports.createChat = async (req, res) => {
         : false;
       const messageStatus = isRead ? "read" : isOutgoing ? "sent" : "received";
 
-      console.log("i will return ", {
-        _id: chat._id,
-        username: otherParticipant.username,
-        avatar: otherParticipant.avatar,
-        lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
-        isOutgoing,
-        isRead,
-        messageStatus,
-        updatedAt: chat.updatedAt,
-      });
+      // console.log("i will return ", {
+      //   _id: chat._id,
+      //   username: otherParticipant.username,
+      //   avatar: otherParticipant.avatar,
+      //   lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
+      //   isOutgoing,
+      //   isRead,
+      //   messageStatus,
+      //   updatedAt: chat.updatedAt,
+      // });
 
       return {
         _id: chat._id,
@@ -203,7 +205,7 @@ exports.getChatMessages = async (req, res) => {
     }
 
     // Check if the user is a participant in the chat
-    console.log(userId, " userId inside getChatMessages");
+    // console.log(userId, " userId inside getChatMessages");
     if (
       !chat.participants.some(
         (participant) => participant._id.toString() === userId
@@ -234,7 +236,7 @@ exports.getChatMessages = async (req, res) => {
       updatedAt: message.updatedAt,
     }));
 
-    console.log("formatted messages: ", { formattedMessages });
+    // console.log("formatted messages: ", { formattedMessages });
 
     res.status(200).json({
       success: true,
