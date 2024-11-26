@@ -14,6 +14,7 @@ import {
   FETCH_CHAT_MESSAGES_SUCCESS,
   FETCH_CHAT_MESSAGES_FAILURE,
   FETCH_MORE_CHAT_MESSAGES_SUCCESS,
+  RE_SEND_MESSAGE_REQUEST,
 } from "../constants/actionTypes";
 
 const initialState = {
@@ -24,6 +25,7 @@ const initialState = {
   chatsLoading: false, // Loading status for fetching chats
   error: null, // Errors when fetching/sending messages
   sendingMessage: false, // Status for when a message is being sent
+  getChatMessagesError: null
 };
 
 const chatReducer = (state = initialState, action) => {
@@ -52,7 +54,7 @@ const chatReducer = (state = initialState, action) => {
       return {
         ...state,
         chatsLoading: false,
-        error: action.payload,
+        getChatMessagesError: action.payload,
       };
 
     case SELECT_CHAT:
@@ -80,7 +82,7 @@ const chatReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        error: action.payload,
+        getChatMessagesError: action.payload,
       };
 
     case FETCH_MORE_CHAT_MESSAGES_SUCCESS:
@@ -111,11 +113,20 @@ const chatReducer = (state = initialState, action) => {
         messages: [...state.messages, action.payload], // Add the new message to the chat
       };
 
+
+      case RE_SEND_MESSAGE_REQUEST: 
+        return {
+          ...state,
+          sendingMessage: true,
+          messages: [...state.messages.filter( msg => msg._id !== action.payload._id), action.payload], // Add the new message to the chat
+        };
+  
+
     case SEND_MESSAGE_SUCCESS:
       return {
         ...state,
         sendingMessage: false,
-        messages: [...state.messages.map((msg)=>msg._id === action.payload._id ? {...msg, status: 'sent'}: msg), action.payload], // Add the new message to the chat
+        messages: [...state.messages.map((msg)=>msg._id === action.payload._id ? {...msg, status: 'sent'}: msg)], // Add the new message to the chat
       };
 
     case SEND_MESSAGE_FAILURE:
@@ -124,7 +135,7 @@ const chatReducer = (state = initialState, action) => {
         sendingMessage: false,
         messages: [
           ...state.messages.map((msg) =>
-            msg._id === action.payload ? { ...msg, status: "not sent" } : msg
+            msg._id === action.payload.message ? { ...msg, status: "notSent" } : msg
           ),
         ],
         error: action.payload.error,

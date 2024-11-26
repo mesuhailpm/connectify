@@ -14,11 +14,13 @@ const chatSocket = (server) => {
     console.log("User connected:", socket.id);
 
     // Handle incoming messages
-    socket.on("sendMessage", async ({ chatId, messageText, userId, _id }) => {
+    socket.on("sendMessage", async ({ chat, content, userId, _id }) => {
+      console.log({ chat, content, userId, _id });
       const newMessage = new Message({
-        chat: chatId,
+        _id,
+        chat: chat,
         sender: userId,
-        content: messageText,
+        content: content,
         status:'sent',
       });
       try {
@@ -29,7 +31,7 @@ const chatSocket = (server) => {
           await newMessage.save({ session: mongooseSession });
 
           await Chat.findByIdAndUpdate(
-            chatId,
+            chat,
             { lastMessage: newMessage._id },
             { session: mongooseSession }
           );

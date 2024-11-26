@@ -160,11 +160,11 @@ exports.createChat = async (req, res) => {
 exports.sendMessage = async (req, res) => {
   try {
     const { content } = req.body;
-    const { chatId } = req.params;
+    const { chat } = req.params;
 
     // Create and save message
     const message = await Message.create({
-      chat: chatId,
+      chat,
       sender: req.user._id,
       content,
     });

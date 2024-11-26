@@ -8,7 +8,7 @@ import { FaCircle } from "react-icons/fa";
 const ChatPanel = () => {
   const chatState = useSelector((state) => state.chat);
 
-  const { error, loading, messages, selectedChat } = chatState;
+  const { getChatMessagesError, loading, messages, selectedChat } = chatState;
   console.log(chatState, " messages from chatState");
   const dispatch = useDispatch();
 
@@ -61,7 +61,8 @@ const ChatPanel = () => {
                 {groupedMessages[date].map((msg) => (
                   <ChatMessage
                     key={msg._id}
-                    messageText={msg.content}
+                    _id ={msg._id}
+                    content={msg.content}
                     isOutgoing={msg.isOutgoing}
                     messageStatus={msg.status}
                     updatedAt={msg.updatedAt}
@@ -70,11 +71,11 @@ const ChatPanel = () => {
               </div>
             ))
         ) : loading ? (
-          <div className="absolute bg-blue-500/5 w-full h-full text-lime-600 flex items-center justify-center top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2">
+          <div className="absolute text-lime-600 flex items-center justify-center top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2">
             <FaCircle className="text-orange-500 animate-ping" />
           </div>
-        ) : error ? (
-          <>{error}</>
+        ) : getChatMessagesError ? (
+          <>{getChatMessagesError}</>
         ) : selectedChat ? (
           <div className="text-center flex items-center h-full justify-center font-bold">
             No Messages{" "}

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { v4 as uuid4 } from "uuid";
+import mongoose, { Types } from "mongoose";
 import { GrSend } from "react-icons/gr";
 import { toast } from "react-toastify";
 import {
@@ -15,12 +15,19 @@ function ChatInput() {
   const { chats, error, loading, messages, selectedChat, sendingMessage } =
     useSelector((state) => state.chat);
   const { user, isAuthenticated, token } = useSelector((state) => state.auth);
+  const [randomId, setRandomId] = useState(new Types.ObjectId().toString());
 
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
 
   const dispatch = useDispatch();
   const chatInputRef = useRef(null);
+  console.log(randomId)
+
+  useEffect(() => {
+    setRandomId(new Types.ObjectId().toString());
+  }, [isSending]);
+
 
   useEffect(() => {
     chatInputRef.current.focus();
@@ -64,7 +71,7 @@ function ChatInput() {
       console.log("message is not sent:", messageId);
 
       // You can update the message state here, e.g., push to messages
-      dispatch({ type: SEND_MESSAGE_FAILURE, payload: messageId });
+      dispatch({ type: SEND_MESSAGE_FAILURE, payload: {message: messageId, error: 'Message not sent'} });
     });
 
     return () => {
@@ -79,11 +86,12 @@ function ChatInput() {
 
     setIsSending(true);
 
+    
     try {
       const newMessagaeObj = {
-        _id: uuid4(),
+        _id: randomId,
         chatId: selectedChat._id,
-        messageText: newMessage,
+        content: newMessage,
         userId: localStorage.getItem("userId"), // Ensure you pass the correct user ID
         status: "sending",
         chat: selectedChat._id,
@@ -94,23 +102,25 @@ function ChatInput() {
         sender: user._id.toString(),
         status: "sending",
       };
-
+      
       // Emit the new message to the server
+      console.log(mongoose.Types.ObjectId.isValid(randomId), ' from valid'); // Check if the ID is valid
+      console.log(randomId)
       console.log("will emit", {
-        _id: uuid4(),
-        chatId: selectedChat._id,
-        messageText: newMessage,
+        _id: randomId,
+        chat: selectedChat._id,
+        content: newMessage,
         userId: localStorage.getItem("userId"), // Ensure you pass the correct user ID
         status: "sending",
       });
-      socket.emit("sendMessage", {
-        _id: uuid4(),
-        chatId: selectedChat._id,
-        messageText: newMessage,
+      await socket.emit("sendMessage", {
+        _id: randomId,
+        chat: selectedChat._id,
+        content: newMessage,
         userId: localStorage.getItem("userId"), // Ensure you pass the correct user ID
         status: "sending",
       });
-
+      
       const messageForState = () => {
         const {
           createdAt,
@@ -137,49 +147,73 @@ function ChatInput() {
         }
       };
 
-      dispatch({ type: SEND_MESSAGE_REQUEST, payload: messageForState() });
+      await dispatch({
+        type: SEND_MESSAGE_REQUEST,
+        payload: messageForState(),
+      });
 
       // Optionally handle sending state/loading
       console.log("Sending message:", newMessage);
+      if (!navigator.onLine) {
+        toast.error("No internet connection. Please check your network.", {
+          autoClose: 500,
+        });
+        setNewMessage("")
+        return;
+      }
+      try {
+        // Listen for the response from the server
+        socket.on("sendMessageSuccess", async (message) => {
+          console.log("New message sent successfully:", message);
+          const {
+            createdAt,
+            updatedAt,
+            content,
+            chatId,
+            chat,
+            readBy,
+            sender,
+            _id,
+          } = message;
 
-      // Listen for the response from the server
-      socket.on("sendMessageSuccess", (message) => {
-        console.log("New message sent successfully:", message);
-        const {
-          createdAt,
-          updatedAt,
-          content,
-          chatId,
-          chat,
-          readBy,
-          sender,
-          _id,
-        } = message;
+          const messageForState = () => {
+            try {
+              return {
+                chat,
+                content,
+                createdAt,
+                updatedAt,
+                readBy,
+                sender,
+                status: "sent",
+                _id,
+                isOutgoing: true,
+              };
+            } catch (error) {
+              console.log("unable to convert message to state", error);
+            }
+          };
 
-        const messageForState = () => {
-          try {
-            return {
-              chat,
-              content,
-              createdAt,
-              updatedAt,
-              readBy,
-              sender,
-              status: "sent",
-              _id,
-              isOutgoing: true,
-            };
-          } catch (error) {
-            console.log("unable to convert message to state", error);
-          }
-        };
-
-        dispatch({ type: SEND_MESSAGE_SUCCESS, payload: messageForState() });
-        setNewMessage(""); // Clear the input after sending
-      });
+          await dispatch({
+            type: SEND_MESSAGE_SUCCESS,
+            payload: messageForState(),
+          });
+          setNewMessage(""); // Clear the input after sending
+        });
+      } catch (error) {
+        console.log(error);
+        await dispatch({
+          type: SEND_MESSAGE_FAILURE,
+          payload: { message: randomId, error: error },
+        });
+      }
     } catch (error) {
       console.log(error);
       toast.error(error.message | "sending failed", { autoClose: 500 });
+      await dispatch({
+        type: SEND_MESSAGE_FAILURE,
+        payload: { message: randomId, error: error },
+      });
     } finally {
       setIsSending(false);
     }
