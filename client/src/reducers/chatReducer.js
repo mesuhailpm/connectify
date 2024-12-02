@@ -10,10 +10,14 @@ import {
   SEND_MESSAGE_FAILURE,
   SEND_MESSAGE_REQUEST,
   SEND_MESSAGE_SUCCESS,
+  RECEIVE_MESSAGE,
   UPDATE_MESSAGE_STATUS,
   FETCH_CHAT_MESSAGES_SUCCESS,
   FETCH_CHAT_MESSAGES_FAILURE,
   FETCH_MORE_CHAT_MESSAGES_SUCCESS,
+  RE_SEND_MESSAGE_REQUEST,
+  MESSAGE_READ_CONFIRMATION ,
+  MESSAGE_READ_BY_SELF ,
 } from "../constants/actionTypes";
 
 const initialState = {
@@ -24,6 +28,7 @@ const initialState = {
   chatsLoading: false, // Loading status for fetching chats
   error: null, // Errors when fetching/sending messages
   sendingMessage: false, // Status for when a message is being sent
+  getChatMessagesError: null
 };
 
 const chatReducer = (state = initialState, action) => {
@@ -52,7 +57,7 @@ const chatReducer = (state = initialState, action) => {
       return {
         ...state,
         chatsLoading: false,
-        error: action.payload,
+        getChatMessagesError: action.payload,
       };
 
     case SELECT_CHAT:
@@ -80,7 +85,7 @@ const chatReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        error: action.payload,
+        getChatMessagesError: action.payload,
       };
 
     case FETCH_MORE_CHAT_MESSAGES_SUCCESS:
@@ -111,25 +116,55 @@ const chatReducer = (state = initialState, action) => {
         messages: [...state.messages, action.payload], // Add the new message to the chat
       };
 
+
+      case RE_SEND_MESSAGE_REQUEST: 
+        return {
+          ...state,
+          sendingMessage: true,
+          messages: [...state.messages.filter( msg => msg._id !== action.payload._id), action.payload], // Add the new message to the chat
+        };
+  
+
     case SEND_MESSAGE_SUCCESS:
       return {
         ...state,
         sendingMessage: false,
-        messages: [...state.messages.map((msg)=>msg._id === action.payload._id ? {...msg, status: 'sent'}: msg), action.payload], // Add the new message to the chat
+        messages: [...state.messages.map((msg)=>msg._id === action.payload._id ? {...msg, status: 'sent'}: msg)], // Add the new message to the chat
       };
 
+      
+      case RECEIVE_MESSAGE:
+        // alert( state.selectedChat._id,'state', action.payload.chatId,' dispatch')
+        return {
+          ...state,
+          messages: state.selectedChat._id === action.payload.chat ? [...state.messages, action.payload] : state.messages, // Add the new message to the chat], // Add the new message to the chat
+          chats: state.chats.map((chat) => chat._id === action.payload.chat ? {...chat, lastMessage: action.payload.content} : chat), // Update the last message of the chat
+        };
+  
     case SEND_MESSAGE_FAILURE:
       return {
         ...state,
         sendingMessage: false,
         messages: [
           ...state.messages.map((msg) =>
-            msg._id === action.payload ? { ...msg, status: "not sent" } : msg
+            msg._id === action.payload.message ? { ...msg, status: "notSent" } : msg
           ),
         ],
         error: action.payload.error,
       };
 
+    case MESSAGE_READ_CONFIRMATION  :
+      return {
+        ...state,
+        messages: state.messages.map((msg) => msg._id === action.payload.messageId ? {...msg, readBy: [...msg.readBy, action.payload.readerId],isReadByTarget: true} : msg),
+      }
+
+    case MESSAGE_READ_BY_SELF :
+    return {  
+      ...state,
+        messages: state.messages.map((msg) => msg._id === action.payload.messageId ? {...msg, readBy: [...msg.readBy, action.payload.readerId]} : msg) 
+      
+      };
     case UPDATE_MESSAGE_STATUS: // For updating read, delivered, sent status
       return {
         ...state,

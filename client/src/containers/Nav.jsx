@@ -12,9 +12,11 @@ export const Nav = () => {
         <img src={logo} width={30} alt="Logo" />
         <h1>Connectify</h1>
       </Link>
-      <Link to="/login"> Login</Link>
-      <Link to="/chats"> Chats</Link>
-      <Link to="/about"> About</Link>
+      <div className="links w-fit flex items-center justify-center gap-4">
+        <Link to="/login"> Login</Link>
+        <Link to="/chats"> Chats</Link>
+        <Link to="/about"> About</Link>
+      </div>
     </nav>
   );
 };

@@ -1,22 +1,76 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchChatMessages } from "../actions/chatActions";
 import { FaCircle } from "react-icons/fa";
+import io from 'socket.io-client'
+import { MESSAGE_READ_BY_SELF  } from "../constants/actionTypes";
+
+const socket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000");
+
 
 const ChatPanel = () => {
   const chatState = useSelector((state) => state.chat);
-
-  const { error, loading, messages, selectedChat } = chatState;
-  console.log(chatState, " messages from chatState");
+  const {user} = useSelector((state) => state.auth)
+  
+  const chatContainerRef = useRef(null)
+  const { getChatMessagesError, loading, messages, selectedChat } = chatState;
   const dispatch = useDispatch();
+
+  const seenMessages = useRef(new Set());
+  console.log(seenMessages.current)
+
+  //useEffect to mark messages as read/seen
+
+  useEffect(() => {
+    if (!socket || !selectedChat?._id || !messages) return; // Guard clause for missing dependencies
+    const alreadySeen = messages
+    .filter((message)=> !message.isOutgoing)
+    .filter((message)=> message.readBy.some( readerId => readerId === user._id ))
+    .map( message => message._id);
+
+    seenMessages.current = new Set(alreadySeen)
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const messageId = entry.target.getAttribute('data-id');
+            if (messageId && !seenMessages.current.has(messageId)) { // Check if the message is not already seen
+              seenMessages.current.add(messageId); // Mark the message as seen
+              socket.emit('messageSeenByMe', { messageId, chatId: selectedChat._id, readerId: user._id });
+              dispatch({ type: MESSAGE_READ_BY_SELF , payload: { messageId, chatId: selectedChat._id, readerId: user._id }  });
+            }
+          }
+        });
+      },
+      { threshold: 1.0 }
+    );
+  
+    const messageElements = document.querySelectorAll('.chat-message-incoming');
+    messageElements.forEach((el) => observer.observe(el));
+
+    // alert("3")
+  
+    return () => {
+      observer.disconnect(); // Ensures all observed elements are unobserved
+    };
+  }, [selectedChat, socket,messages]);
+  
+
+  useEffect(()=>{
+    if(chatContainerRef ){
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+
+  },[messages])
 
   useEffect(() => {
     const fetchMessagesByChat = (chatId) => dispatch(fetchChatMessages(chatId));
     if (selectedChat) {
       fetchMessagesByChat(selectedChat._id);
-      console.log("useEffect to fetch chats by message");
+      console.log("useEffect to fetch messsages for chats");
     }
   }, [selectedChat?._id]);
 
@@ -46,7 +100,8 @@ const ChatPanel = () => {
   return (
     <div className="chat-panel flex flex-col min-h-full flex-grow"  style={{ flexBasis: "60%" }}>
       <div
-        className="chat-message-container grow bg-slate-300  overflow-y-auto hide-scrollbar border-black p-4 "
+        ref={chatContainerRef}
+        className="chat-message-container grow bg-chat_background  overflow-y-auto hide-scrollbar border-black p-4 "
         
       >
         {Object.keys(groupedMessages).length ? (
@@ -54,27 +109,29 @@ const ChatPanel = () => {
             .sort((a, b) => a - b)
             .map((date) => (
               <div key={date} className="date-group flex flex-col gap-1">
-                <h3 className="date-header text-center text-gray-500 text-lg m-3">
+                <h3 className="date-header text-center text-gray-200 text-lg m-3">
                   {date}
                 </h3>{" "}
                 {/* Date header */}
                 {groupedMessages[date].map((msg) => (
                   <ChatMessage
                     key={msg._id}
-                    messageText={msg.content}
+                    _id ={msg._id}
+                    content={msg.content}
                     isOutgoing={msg.isOutgoing}
                     messageStatus={msg.status}
                     updatedAt={msg.updatedAt}
+                    isReadByTarget={msg.isReadByTarget}
                   />
                 ))}
               </div>
             ))
         ) : loading ? (
-          <div className="absolute bg-blue-500/5 w-full h-full text-lime-600 flex items-center justify-center top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2">
-            <FaCircle className="animate-ping" />
+          <div className="absolute text-lime-600 flex items-center justify-center top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2">
+            <FaCircle className="text-orange-500 animate-ping" />
           </div>
-        ) : error ? (
-          <>{error}</>
+        ) : getChatMessagesError ? (
+          <>{getChatMessagesError}</>
         ) : selectedChat ? (
           <div className="text-center flex items-center h-full justify-center font-bold">
             No Messages{" "}
