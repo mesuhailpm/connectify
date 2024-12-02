@@ -16,6 +16,8 @@ import {
   FETCH_CHAT_MESSAGES_FAILURE,
   FETCH_MORE_CHAT_MESSAGES_SUCCESS,
   RE_SEND_MESSAGE_REQUEST,
+  MESSAGE_READ_CONFIRMATION ,
+  MESSAGE_READ_BY_SELF ,
 } from "../constants/actionTypes";
 
 const initialState = {
@@ -132,9 +134,11 @@ const chatReducer = (state = initialState, action) => {
 
       
       case RECEIVE_MESSAGE:
+        // alert( state.selectedChat._id,'state', action.payload.chatId,' dispatch')
         return {
           ...state,
-          messages: [...state.messages, action.payload], // Add the new message to the chat
+          messages: state.selectedChat._id === action.payload.chat ? [...state.messages, action.payload] : state.messages, // Add the new message to the chat], // Add the new message to the chat
+          chats: state.chats.map((chat) => chat._id === action.payload.chat ? {...chat, lastMessage: action.payload.content} : chat), // Update the last message of the chat
         };
   
     case SEND_MESSAGE_FAILURE:
@@ -149,6 +153,18 @@ const chatReducer = (state = initialState, action) => {
         error: action.payload.error,
       };
 
+    case MESSAGE_READ_CONFIRMATION  :
+      return {
+        ...state,
+        messages: state.messages.map((msg) => msg._id === action.payload.messageId ? {...msg, readBy: [...msg.readBy, action.payload.readerId],isReadByTarget: true} : msg),
+      }
+
+    case MESSAGE_READ_BY_SELF :
+    return {  
+      ...state,
+        messages: state.messages.map((msg) => msg._id === action.payload.messageId ? {...msg, readBy: [...msg.readBy, action.payload.readerId]} : msg) 
+      
+      };
     case UPDATE_MESSAGE_STATUS: // For updating read, delivered, sent status
       return {
         ...state,

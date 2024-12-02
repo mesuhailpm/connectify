@@ -4,14 +4,61 @@ import ChatInput from "./ChatInput";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchChatMessages } from "../actions/chatActions";
 import { FaCircle } from "react-icons/fa";
+import io from 'socket.io-client'
+import { MESSAGE_READ_BY_SELF  } from "../constants/actionTypes";
+
+const socket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000");
+
 
 const ChatPanel = () => {
   const chatState = useSelector((state) => state.chat);
+  const {user} = useSelector((state) => state.auth)
   
   const chatContainerRef = useRef(null)
   const { getChatMessagesError, loading, messages, selectedChat } = chatState;
-  console.log(chatState, " messages from chatState");
   const dispatch = useDispatch();
+
+  const seenMessages = useRef(new Set());
+  console.log(seenMessages.current)
+
+  //useEffect to mark messages as read/seen
+
+  useEffect(() => {
+    if (!socket || !selectedChat?._id || !messages) return; // Guard clause for missing dependencies
+    const alreadySeen = messages
+    .filter((message)=> !message.isOutgoing)
+    .filter((message)=> message.readBy.some( readerId => readerId === user._id ))
+    .map( message => message._id);
+
+    seenMessages.current = new Set(alreadySeen)
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const messageId = entry.target.getAttribute('data-id');
+            if (messageId && !seenMessages.current.has(messageId)) { // Check if the message is not already seen
+              seenMessages.current.add(messageId); // Mark the message as seen
+              socket.emit('messageSeenByMe', { messageId, chatId: selectedChat._id, readerId: user._id });
+              dispatch({ type: MESSAGE_READ_BY_SELF , payload: { messageId, chatId: selectedChat._id, readerId: user._id }  });
+            }
+          }
+        });
+      },
+      { threshold: 1.0 }
+    );
+  
+    const messageElements = document.querySelectorAll('.chat-message-incoming');
+    messageElements.forEach((el) => observer.observe(el));
+
+    // alert("3")
+  
+    return () => {
+      observer.disconnect(); // Ensures all observed elements are unobserved
+    };
+  }, [selectedChat, socket,messages]);
+  
+
   useEffect(()=>{
     if(chatContainerRef ){
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -23,7 +70,7 @@ const ChatPanel = () => {
     const fetchMessagesByChat = (chatId) => dispatch(fetchChatMessages(chatId));
     if (selectedChat) {
       fetchMessagesByChat(selectedChat._id);
-      console.log("useEffect to fetch chats by message");
+      console.log("useEffect to fetch messsages for chats");
     }
   }, [selectedChat?._id]);
 
@@ -74,6 +121,7 @@ const ChatPanel = () => {
                     isOutgoing={msg.isOutgoing}
                     messageStatus={msg.status}
                     updatedAt={msg.updatedAt}
+                    isReadByTarget={msg.isReadByTarget}
                   />
                 ))}
               </div>

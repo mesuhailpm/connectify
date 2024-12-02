@@ -21,15 +21,34 @@ const chatSocket = (server) => {
       console.log(users, " are updated");
     });
 
+    socket.on("messageSeenByMe", async ({messageId, chatId, readerId }) => {
+      try {
+        console.log('messageseen emitted from receiver')
+        await Message.findByIdAndUpdate(messageId, { $push:{readBy: readerId}}, {new: true}); // Update the message status to 'read'
+        const message = await Message.findById(messageId)
+        const sender = message.sender
+        const senderSocketId = users[sender]
+        console.log(readerId,' is readerId')
+        console.log(users,'senderSocketIdare users')
+        console.log(senderSocketId, ' is senderSocketId')
+        if( senderSocketId) {
+          io.to(senderSocketId).emit("messageSeenByTarget", messageId, readerId, chatId);
+        }
+      } catch (error) {
+        console.error('Error updating message status to read:', error);
+      }
+    })
+
     // Handle incoming messages
-    socket.on("sendMessage", async ({ chat, content, userId, _id, recipient }) => {
-      console.log({ chat, content, userId, _id , recipient }, ' is inside send Message (socket)');
+    socket.on("sendMessage", async ({ chat, content, userId, _id, target }) => {
+      console.log({ chat, content, userId, _id , target }, ' is inside send Message (socket)');
       const newMessage = new Message({
         _id,
         chat: chat,
         sender: userId,
         content: content,
         status: "sent",
+        target,
       });
       try {
         const mongooseSession = await mongoose.startSession();
@@ -43,9 +62,10 @@ const chatSocket = (server) => {
             { session: mongooseSession }
           );
           io.emit("sendMessageSuccess", newMessage);
-          const recipientSocketId = users[recipient];
+          const recipientSocketId = users[target];
+          if(recipientSocketId) {
             io.to(recipientSocketId).emit("receiveMessage", newMessage);
-          
+          }
           await mongooseSession.commitTransaction();
         } catch (error) {
           await mongooseSession.abortTransaction();

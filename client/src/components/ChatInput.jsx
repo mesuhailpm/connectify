@@ -9,6 +9,7 @@ import {
   SEND_MESSAGE_FAILURE,
   SEND_MESSAGE_REQUEST,
   RECEIVE_MESSAGE,
+  MESSAGE_READ_CONFIRMATION ,
 } from "../constants/actionTypes";
 import { io } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,7 +26,6 @@ function ChatInput() {
 
   const dispatch = useDispatch();
   const chatInputRef = useRef(null);
-  console.log(randomId)
 
   useEffect(() => {
     if (user && user._id) {
@@ -96,6 +96,14 @@ function ChatInput() {
     };
   }, []);
 
+  useEffect(()=>{
+    //Listen for message being read by the recipient
+
+    socket.on("messageSeenByTarget", async(messageId, readerId)=>{
+      await dispatch({type: MESSAGE_READ_CONFIRMATION , payload: {messageId, readerId} })
+    })
+  },[messages])
+
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedChat) {
       return;
@@ -128,6 +136,8 @@ function ChatInput() {
         content: newMessage,
         userId: localStorage.getItem("userId"), // Ensure you pass the correct user ID
         status: "sending",
+        readBy:[],
+        target: selectedChat.recipient
       });
       await socket.emit("sendMessage", {
         _id: randomId,
@@ -135,7 +145,7 @@ function ChatInput() {
         content: newMessage,
         userId: localStorage.getItem("userId"), // Ensure you pass the correct user ID
         status: "sending",
-        recipient: selectedChat.recipient,
+        target: selectedChat.recipient
       });
 
       const messageForState = () => {
@@ -148,6 +158,7 @@ function ChatInput() {
           readBy,
           sender,
           _id,
+          target
         } = newMessagaeObj;
         try {
           return {
@@ -158,6 +169,8 @@ function ChatInput() {
             sender,
             status: "sending",
             isOutgoing: true,
+            readBy,
+            target
           };
         } catch (error) {
           console.log("unable to convert message to state", error);

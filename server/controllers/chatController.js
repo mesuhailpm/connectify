@@ -219,7 +219,7 @@ exports.getChatMessages = async (req, res) => {
     const messages = await Message.find({ chat: chatId })
       .populate("sender", "username")
       .exec();
-
+    
     // If no messages, return an empty array
     if (!messages.length) {
       console.log("no messages for this chat");
@@ -234,6 +234,10 @@ exports.getChatMessages = async (req, res) => {
       isOutgoing: message.sender._id.equals(userId),
       status: message.status,
       updatedAt: message.updatedAt,
+      target: message.target, //araray of target user Ids
+      readBy: message.readBy,
+      //get read status if readBy includes all item in target array
+      isReadByTarget: message.readBy.length === message.target.length ? true : false
     }));
 
     // console.log("formatted messages: ", { formattedMessages });

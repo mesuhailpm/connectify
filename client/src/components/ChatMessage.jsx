@@ -9,8 +9,8 @@ import { SEND_MESSAGE_FAILURE, SEND_MESSAGE_SUCCESS, RE_SEND_MESSAGE_REQUEST } f
 const socket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000");
 
 
-function ChatMessage({_id, content, isOutgoing, messageStatus, updatedAt }) {
-  console.log({_id, content, isOutgoing, messageStatus, updatedAt })
+function ChatMessage({_id, content, isOutgoing, messageStatus, updatedAt, isReadByTarget }) {
+  // console.log({_id, content, isOutgoing, messageStatus, updatedAt,isReadByTarget,0:0 })
 
   const [isSending, setIsSending] = useState(false)
   const dispatch = useDispatch();
@@ -22,7 +22,7 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
   const statusIcons = {
     sent: <BsCheck2 className="text-lime-100 text-xl font-bold" />,
     delivered: <BsCheck2All className="text-gray-800 text-xl" />,
-    read: <BsCheck2All className="text-blue-600" />,
+    read: <BsCheck2All className="text-xl text-blue-400" />,
     sending: <ImSpinner9 className="text-gray-800 animate-spin text-xl" />,
     notSent: <BsStopBtn className="text-lime anima text-xl font-bold" />,
   };
@@ -47,6 +47,7 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
         readBy: [],
         sender: user._id.toString(),
         status: "sending",
+        target: selectedChat.recipient
       };
 
       // Emit the new message to the server
@@ -63,6 +64,7 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
         content,
         userId: localStorage.getItem("userId"), // Ensure you pass the correct user ID
         status: "sending",
+        target: selectedChat.recipient
       });
 
       const messageForState = () => {
@@ -74,6 +76,7 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
           readBy,
           sender,
           _id,
+          target
         } = newMessagaeObj;
         try {
           return {
@@ -85,6 +88,8 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
             sender,
             status: "sending",
             isOutgoing: true,
+            readBy,
+            target
           };
         } catch (error) {
           console.log("unable to convert message to state", error);
@@ -174,7 +179,8 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
 
   return (
     <div
-      className={`message  flex flex-col ${
+      data-id={_id}
+      className={`chat-message${isOutgoing ?'-outgoing':'-incoming'} message  flex flex-col ${
         isOutgoing ? "place-self-end" : "place-self-start"
       }  `}
     >
@@ -196,7 +202,7 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
         </div>
         {isOutgoing && messageStatus && (
           <div className="right text-sm flex items-end text-gray-400 ml-2">
-            {statusIcons[messageStatus]}
+            {isReadByTarget ? statusIcons['read']: statusIcons[messageStatus]}
           </div>
         )}
       </div>
