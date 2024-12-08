@@ -13,6 +13,7 @@ import {
 
 import ChatMenuButton from "../components/ChatMenuButton";
 import { useSelector } from "react-redux";
+import socket from "../sockets/socket.js";
 
 const ChatMenu = () => {
   const { selectedChat } = useSelector((state) => state.chat);
