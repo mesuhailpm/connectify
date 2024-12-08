@@ -1,5 +1,6 @@
 const Chat = require("../models/Chat");
 const Message = require("../models/Message");
+const User = require("../models/User");
 
 // Get all chat threads for the logged-in user
 exports.getChats = async (req, res) => {
@@ -9,7 +10,7 @@ exports.getChats = async (req, res) => {
     const chats = await Chat.find({ participants: req.user._id.toString() })
       .populate({
         path: "participants",
-        select: "username avatar",
+        select: "username avatar lastSeen isOnline",
       })
       .populate({
         path: "lastMessage",
@@ -44,7 +45,7 @@ exports.getChats = async (req, res) => {
       //   messageStatus,
       //   updatedAt: chat.updatedAt,
       // });
-
+      // console.log({otherParticipant})
       return {
         _id: chat._id,
         username: otherParticipant.username,
@@ -55,6 +56,8 @@ exports.getChats = async (req, res) => {
         isRead,
         messageStatus,
         updatedAt: chat.updatedAt,
+        isOnline: otherParticipant.isOnline,
+        lastSeen: otherParticipant.lastSeen,
       };
     });
 
@@ -99,6 +102,7 @@ exports.createChat = async (req, res) => {
       console.log(" will create a new chat now!");
       chat = await Chat.create({ participants });
       console.log({ chat }, " is new chat");
+      
       const newChat = await chat.populate({
         path:'participants',
         select:'username avatar',
@@ -149,6 +153,16 @@ exports.createChat = async (req, res) => {
     const result = formattedChat(chat)
     console.log(result, " these formated chat will be returned");
 
+    //add the other user to the contact list of the current user
+    const otherParticipant = chat.participants.find(
+      (participant) => !participant._id.equals(req.user._id)
+    );
+
+    console.log('will add the other participant to the contact list of the current user', otherParticipant._id)
+    await User.findByIdAndUpdate(req.user._id, { $push: { contacts: otherParticipant._id } });
+    console.log('will add this user to the contact list of the other user', req.user._id)
+    await User.findByIdAndUpdate(otherParticipant._id, { $push: { contacts: req.user._id } });
+
     res.status(200).json({ success: true, data: result });
   } catch (error) {
     console.log(error);
@@ -172,7 +186,7 @@ exports.sendMessage = async (req, res) => {
     });
 
     // Update chat with the last message
-    await Chat.findByIdAndUpdate(chatId, { lastMessage: message._id });
+    await Chat.findByIdAndUpdate(chat, { lastMessage: message._id });
 
     res.status(201).json({ success: true, data: message });
   } catch (error) {

@@ -3,10 +3,9 @@ import { BsCheck2All, BsCheck2 } from "react-icons/bs";
 import { MdSmsFailed as BsStopBtn } from "react-icons/md";
 import { ImSpinner9 } from "react-icons/im";
 import { useDispatch, useSelector } from "react-redux";
-import io from 'socket.io-client'
 import { toast } from "react-toastify";
 import { SEND_MESSAGE_FAILURE, SEND_MESSAGE_SUCCESS, RE_SEND_MESSAGE_REQUEST } from "../constants/actionTypes";
-const socket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000");
+import socket from "../sockets/socket";
 
 
 function ChatMessage({_id, content, isOutgoing, messageStatus, updatedAt, isReadByTarget }) {

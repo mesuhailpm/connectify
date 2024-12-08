@@ -7,8 +7,7 @@ import { FaCircle } from "react-icons/fa";
 import io from 'socket.io-client'
 import { MESSAGE_READ_BY_SELF  } from "../constants/actionTypes";
 
-const socket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000");
-
+import socket from "../sockets/socket";
 
 const ChatPanel = () => {
   const chatState = useSelector((state) => state.chat);
