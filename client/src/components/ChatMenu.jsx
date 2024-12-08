@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import getTimeDifference from "../utils/getTimeDifference.ts";
 import {
   FaBell,
   FaUserSlash,
@@ -17,6 +18,51 @@ import socket from "../sockets/socket.js";
 
 const ChatMenu = () => {
   const { selectedChat } = useSelector((state) => state.chat);
+  const [chatPartner, setChatPartner] = useState(selectedChat);
+
+
+  
+  useEffect(() => {
+    //listens for chatPartner getting online
+    socket.on(
+      "user-online",
+      async (userId) => {
+
+        setChatPartner((prev) => {
+          return { ...prev, isOnline: chatPartner.recipient === userId ? true : prev.isOnline };
+        });
+      },
+      socket.off("user-online")
+    );
+  }, []);
+  
+  useEffect(() => {
+    //listens for chatPartner getting online
+    socket.on(
+      "user-offline",
+      async (userId) => {
+        setChatPartner((prev) => {
+          return {
+            ...prev,
+            isOnline: chatPartner.recipient === userId ? false : prev.isOnline,
+            lastSeen:
+              chatPartner.recipient === userId ? new Date().toLocaleString() : prev.lastSeen,
+          };
+        });
+      },
+      socket.off("user-offline")
+    );
+  }, []);
+  // const chatPartner = selectedChat.participants
+  useEffect(() => {
+    if(selectedChat._id)setChatPartner({
+      lastSeen: selectedChat?.lastSeen,
+      isOnline: selectedChat?.isOnline,
+      avatar: selectedChat?.avatar,
+      username: selectedChat?.username,
+      recipient: selectedChat?.recipient,
+    });
+  }, [selectedChat._id]);
   const handleMuteNotifications = () => {
     console.log("Notifications muted");
   };
@@ -49,13 +95,6 @@ const ChatMenu = () => {
     console.log("File shared");
   };
 
-  if (!selectedChat)
-    return (
-      <div className="chat-menu text-center w-3/12 flex flex-grow items-center h-full justify-center p-1 border-black font-bold">
-        No Chat Selected
-      </div>
-    );
-
   return (
     <div className="chat-menu bg-black overflow-y-auto hide-scrollbar flex w-3/12 flex-col h-full flex-grow p-1 gap-1">
       <h2 className="text-lg text-center font-bold mb-2">Chat Options</h2>
@@ -70,7 +109,13 @@ const ChatMenu = () => {
         />
         <h3 className="text-xl">{selectedChat.name}</h3>
         <p className="text-green-100">
-          Status: <span className="font-semibold text-lime-500">Online</span>
+          {chatPartner.isOnline ? (
+            <span className="font-semibold text-lime-500">Online</span>
+          ) : (
+            <span className="font-semibold text-blue-500">{`Last seen: ${getTimeDifference(
+              new Date(chatPartner.lastSeen).toLocaleString()
+            )}`}</span>
+          )}
         </p>
       </div>
       <input
