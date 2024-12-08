@@ -9,6 +9,20 @@ const userSchema = new Schema({
     unique: true,
     trim: true,
   },
+  contacts: [
+    { type: Schema.Types.ObjectId, ref: 'User', default: [], required: true }
+  ],
+  isOnline: {
+    type: Boolean,
+    required: true,
+    default : false
+  },
+  lastSeen:{
+    required: true,
+    type: Date,
+    default: Date.now
+  },
+  
   email: {
     type: String,
     required: true,

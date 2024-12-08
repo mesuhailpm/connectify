@@ -56,7 +56,13 @@ const Chats = () => {
     <>
       <ChatList />
       <ChatPanel />
-      <ChatMenu />
+      {chatState.selectedChat ? (
+        <ChatMenu />
+      ) : (
+        <div className="chat-menu text-center w-3/12 flex flex-grow items-center h-full justify-center p-1 border-black font-bold">
+          No Chat Selected
+        </div>
+      )}
     </>
   );
 };
