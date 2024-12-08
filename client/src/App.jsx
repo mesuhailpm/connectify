@@ -15,16 +15,26 @@ import { useEffect } from "react";
 import { loadUserFromToken } from "./actions/authActions";
 import SignedInIndicator from "./components/SignedIndicator";
 import About from "./containers/About";
+import socket from "./sockets/socket";
 
 function App() {
   const dispatch = useDispatch();
-  const { isAuthenticated, loading } = useSelector((state) => state.auth);
+  const { isAuthenticated, loading,user } = useSelector((state) => state.auth);
 
   const { error: chatError } = useSelector((state) => state.chat);
   const { error: authError } = useSelector((state) => state.auth);
   useEffect(() => {
     dispatch(loadUserFromToken()); // Load the user from the token on app load
   }, [dispatch, loading]);
+
+  useEffect(() => {
+    if (user && user._id) {
+      socket.emit("registerUser", user._id.toString());
+      socket.emit("user-connected", user._id.toString());
+    }
+  }, [user]);
+
+
 
   return (
     <div className="app relative flex flex-col bg-primary/50 border-4 w-full overflow-hidden border-red-700 px-2 h-full">

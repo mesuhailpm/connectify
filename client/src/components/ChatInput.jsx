@@ -26,12 +26,6 @@ function ChatInput() {
   const chatInputRef = useRef(null);
 
   useEffect(() => {
-    if (user && user._id) {
-      socket.emit("registerUser", user._id.toString());
-    }
-  }, [user]);
-
-  useEffect(() => {
     setRandomId(new Types.ObjectId().toString());
     chatInputRef.current.focus();
   }, [isSending]);
