@@ -53,7 +53,7 @@ const SignedInIndicator = () => {
           className="h-8 w-8 rounded-full"
         />
       )}
-      <span className="font-bold">Welcome, {user?.username || 'User'}!</span>
+      <span className="font-bold">Welcome, {user?._id} {user?.username || 'User'}!</span>
       <Link to="/profile" className="text-blue-300 font-bold hover:underline">
         Profile
       </Link>

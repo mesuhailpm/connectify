@@ -133,6 +133,7 @@ const chatSocket = (server) => {
             { new: true }
           ); // Remove the socket ID from the user's contacts
           io.to(userId).emit("user-offline", userId); // Emit 'user-offline' event to those who needs to be notified
+          console.log('updated offline status and emitted it')
         }
       } catch (error) {
         console.log(error, " error inside the disconnect emition handler");
