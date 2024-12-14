@@ -13,56 +13,47 @@ import {
 } from "react-icons/fa";
 
 import ChatMenuButton from "../components/ChatMenuButton";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import socket from "../sockets/socket.js";
 
 const ChatMenu = () => {
   const { selectedChat } = useSelector((state) => state.chat);
-  const [chatPartner, setChatPartner] = useState(selectedChat);
+  const dispatch = useDispatch();
 
-
-  
   useEffect(() => {
     //listens for chatPartner getting online
     socket.on(
       "user-online",
       async (userId) => {
-
-        setChatPartner((prev) => {
-          return { ...prev, isOnline: chatPartner.recipient === userId ? true : prev.isOnline };
-        });
+        if (userId === selectedChat.recipient) {
+          dispatch({
+            type: "UPDATE_CHAT_PARTNER",
+            payload: { isOnline: true },
+          });
+        }
       },
       socket.off("user-online")
     );
   }, []);
-  
+
   useEffect(() => {
     //listens for chatPartner getting online
     socket.on(
       "user-offline",
+
       async (userId) => {
-        setChatPartner((prev) => {
-          return {
-            ...prev,
-            isOnline: chatPartner.recipient === userId ? false : prev.isOnline,
-            lastSeen:
-              chatPartner.recipient === userId ? new Date().toLocaleString() : prev.lastSeen,
-          };
-        });
+        if (userId === selectedChat.recipient) {
+          dispatch({
+            type: "UPDATE_CHAT_PARTNER",
+            payload: { isOnline: false, lastSeen: new Date().toLocaleString() },
+          });
+        }
       },
       socket.off("user-offline")
     );
   }, []);
+
   // const chatPartner = selectedChat.participants
-  useEffect(() => {
-    if(selectedChat._id)setChatPartner({
-      lastSeen: selectedChat?.lastSeen,
-      isOnline: selectedChat?.isOnline,
-      avatar: selectedChat?.avatar,
-      username: selectedChat?.username,
-      recipient: selectedChat?.recipient,
-    });
-  }, [selectedChat._id]);
   const handleMuteNotifications = () => {
     console.log("Notifications muted");
   };
@@ -109,11 +100,11 @@ const ChatMenu = () => {
         />
         <h3 className="text-xl">{selectedChat.name}</h3>
         <p className="text-green-100">
-          {chatPartner.isOnline ? (
+          {selectedChat.isOnline ? (
             <span className="font-semibold text-lime-500">Online</span>
           ) : (
             <span className="font-semibold text-blue-500">{`Last seen: ${getTimeDifference(
-              new Date(chatPartner.lastSeen).toLocaleString()
+              new Date(selectedChat.lastSeen).toLocaleString()
             )}`}</span>
           )}
         </p>
