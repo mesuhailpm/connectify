@@ -21,37 +21,34 @@ const ChatMenu = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    //listens for chatPartner getting online
-    socket.on(
-      "user-online",
-      async (userId) => {
-        if (userId === selectedChat.recipient) {
-          dispatch({
-            type: "UPDATE_CHAT_PARTNER",
-            payload: { isOnline: true },
-          });
-        }
-      },
-      socket.off("user-online")
-    );
-  }, []);
+    const handleOnline = async (userId) => {
+      if (userId === selectedChat.recipient) {
+        dispatch({
+          type: "UPDATE_CHAT_PARTNER",
+          payload: { isOnline: true },
+        });
+      }
+    };
 
-  useEffect(() => {
-    //listens for chatPartner getting online
-    socket.on(
-      "user-offline",
+    const handleOffline = async (userId) => {
+      if (userId === selectedChat.recipient) {
+        dispatch({
+          type: "UPDATE_CHAT_PARTNER",
+          payload: { isOnline: false, lastSeen: new Date().toLocaleString() },
+        });
+      }
+    };
 
-      async (userId) => {
-        if (userId === selectedChat.recipient) {
-          dispatch({
-            type: "UPDATE_CHAT_PARTNER",
-            payload: { isOnline: false, lastSeen: new Date().toLocaleString() },
-          });
-        }
-      },
-      socket.off("user-offline")
-    );
-  }, []);
+    // Listen for chat partner status changes
+    socket.on("user-online", handleOnline);
+    socket.on("user-offline", handleOffline);
+
+    // Cleanup function to remove event listeners
+    return () => {
+      socket.off("user-online", handleOnline);
+      socket.off("user-offline", handleOffline);
+    };
+  }, [dispatch, selectedChat.recipient]);
 
   // const chatPartner = selectedChat.participants
   const handleMuteNotifications = () => {
