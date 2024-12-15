@@ -5,7 +5,6 @@ import {
   FETCH_MORE_CHAT_SUCCESS,
   FETCH_MESSAGES_FAILURE,
   FETCH_MESSAGES_REQUEST,
-  FETCH_MESSAGES_SUCCESS,
   SELECT_CHAT,
   SEND_MESSAGE_FAILURE,
   SEND_MESSAGE_REQUEST,
@@ -18,6 +17,8 @@ import {
   RE_SEND_MESSAGE_REQUEST,
   MESSAGE_READ_CONFIRMATION ,
   MESSAGE_READ_BY_SELF ,
+  UPDATE_CHAT_PARTNER,
+  LOGOUT
 } from "../constants/actionTypes";
 
 const initialState = {
@@ -60,6 +61,15 @@ const chatReducer = (state = initialState, action) => {
         getChatMessagesError: action.payload,
       };
 
+    case LOGOUT:
+            return {
+              ...state,
+              getChatMessagesError:null,
+              messages:[],
+              chats:[],            
+              selectedChat: null,
+            };
+
     case SELECT_CHAT:
       return {
         ...state,
@@ -68,6 +78,11 @@ const chatReducer = (state = initialState, action) => {
         loading: false,
       };
 
+    case UPDATE_CHAT_PARTNER:
+      return {
+        ...state,
+        selectedChat: {...state.selectedChat, ...action.payload},
+      }
     case FETCH_MESSAGES_REQUEST:
       return {
         ...state,
@@ -79,6 +94,7 @@ const chatReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         messages: action.payload,
+        getChatMessagesError: null
       };
 
     case FETCH_CHAT_MESSAGES_FAILURE:
@@ -95,12 +111,6 @@ const chatReducer = (state = initialState, action) => {
         loading: false,
       };
 
-    case FETCH_MESSAGES_SUCCESS:
-      return {
-        ...state,
-        loading: false,
-        messages: action.payload.messages,
-      };
 
     case FETCH_MESSAGES_FAILURE:
       return {

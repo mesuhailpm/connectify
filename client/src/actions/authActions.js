@@ -2,6 +2,7 @@
 import API from '../api'
 import { AUTH_REQUEST, AUTH_SUCCESS, AUTH_FAILURE ,LOGOUT} from '../constants/actionTypes';
 import { toast } from 'react-toastify';
+import socket from '../sockets/socket';
 
 // Load user from the token if it exists in localStorage
 export const loadUserFromToken = () => async (dispatch) => {
@@ -91,6 +92,7 @@ export const signUp = (userData) => async (dispatch) => {
 };
 
 export const logout = () => (dispatch) => {
+  socket.emit('user-logout', localStorage.getItem('userId'));
   localStorage.removeItem("token");
   localStorage.removeItem("userId");
   dispatch({ type: LOGOUT });
