@@ -84,7 +84,7 @@ exports.createChat = async (req, res) => {
     })
       .populate({
         path: "participants",
-        select: "username avatar",
+        select: "username avatar lastSeen isOnline",
       })
       .populate({
         path: "lastMessage",
@@ -105,7 +105,7 @@ exports.createChat = async (req, res) => {
       
       const newChat = await chat.populate({
         path:'participants',
-        select:'username avatar',
+        select:'username avatar lastSeen isOnline',
       })
       chat = newChat
       console.log({ chat }, " is new chat with participant populated");
@@ -148,6 +148,9 @@ exports.createChat = async (req, res) => {
         isRead,
         messageStatus,
         updatedAt: chat.updatedAt,
+        isOnline: otherParticipant.isOnline,
+        lastSeen: otherParticipant.lastSeen,
+
       };
     };
     const result = formattedChat(chat)

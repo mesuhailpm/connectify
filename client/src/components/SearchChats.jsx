@@ -2,8 +2,8 @@
 import React, { useState } from "react";
 import API from "../api";
 import { useDispatch, useSelector } from "react-redux";
-import { setActiveChat, fetchChatMessages } from "../actions/chatActions";
-import { FETCH_MORE_CHAT_SUCCESS } from "../constants/actionTypes";
+import {  fetchChatMessages } from "../actions/chatActions";
+import { FETCH_MORE_CHAT_SUCCESS, SELECT_CHAT } from "../constants/actionTypes";
 
 const SearchChats = ({ isNew = false  }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,7 +11,7 @@ const SearchChats = ({ isNew = false  }) => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState("");
   const authState = useSelector((state) => state.auth);
-  const {chatsLoading} = useSelector((state) => state.chat);
+  const {chatsLoading, chats} = useSelector((state) => state.chat);
 
   console.log(users);
   console.log(authState);
@@ -35,25 +35,23 @@ const SearchChats = ({ isNew = false  }) => {
       console.log(chat, ' is the chat')
       
       if (response.data.success) {
-        // Update chat list with the newly created or fetched chat
-        dispatch({type: FETCH_MORE_CHAT_SUCCESS, payload:chat})
-        // setChatList((prevChats) => [...prevChats, data.chat]);
-        // Optionally, select the chat to open in the Chat Panel
-        setActiveChat(chat._id);
+        // switch to the fetched chat that is already available
+        if (chats.some((el)=> el._id === chat._id )){
+          await dispatch({type: SELECT_CHAT, payload: chat})
+          
+        }else{
+
+          // Update chat list with the newly created chat and switch
+          dispatch({type: FETCH_MORE_CHAT_SUCCESS, payload:chat})
+          await dispatch({type: SELECT_CHAT, payload: chat})
+
+        }
         setSearchTerm("")
         setUsers([])
       }
     } catch (error) {
       console.error("Error starting chat:", error);
-    }
-    
-    // Dispatch action to set active chat
-    
-    // dispatch(setActiveChat(user));
-    
-    // Fetch chat messages
-    // dispatch(fetchChatMessages(user._id));
-  };
+    }  };
   
   const handleSearch = async (e) => {
     setSearchTerm(e.target.value);

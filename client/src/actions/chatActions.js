@@ -13,35 +13,6 @@ import {
 } from "../constants/actionTypes.js";
 
 
-export const searchUsers = (searchTerm) => async (dispatch) => {
-  try {
-    dispatch({ type: SEARCH_USERS_REQUEST });
-
-    const { data } = await API.get(`/api/users/search?query=${searchTerm}`);
-
-    dispatch({
-      type: SEARCH_USERS_SUCCESS,
-      payload: data.users, // assuming API returns an array of users
-    });
-  } catch (error) {
-    dispatch({
-      type: SEARCH_USERS_FAILURE,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
-    });
-  }
-};
-
-export const setActiveChat = (user) => {
-  console.log(user, "from chatCtion");
-  return {
-    type: SELECT_CHAT,
-    payload: user,
-  };
-};
-
 // Fetch chat messages for the selected user
 export const fetchChatMessages = (chatId) => async (dispatch) => {
   console.log("inside fetchchatMessages");

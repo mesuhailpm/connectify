@@ -38,7 +38,6 @@ const userSchema = new Schema({
   },
   avatar: {
     type: String,
-    default: 'https://ui-avatars.com/api/?name=User',
   },
   createdAt: {
     type: Date,
@@ -60,5 +59,13 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-const User = mongoose.model('User', userSchema);
+userSchema.pre("save", function (next) {
+  if (!this.avatar) {
+    const encodedName = encodeURIComponent(this.username);
+    this.avatar = `https://ui-avatars.com/api/?name=${encodedName}`;
+  }
+  next();
+});
+
+const User = mongoose.model("User", userSchema);
 module.exports = User;
