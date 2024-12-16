@@ -10,6 +10,7 @@ const SearchChats = ({ isNew = false  }) => {
   const [users, setUsers] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const authState = useSelector((state) => state.auth);
   const {chatsLoading, chats} = useSelector((state) => state.chat);
 
@@ -52,6 +53,20 @@ const SearchChats = ({ isNew = false  }) => {
     } catch (error) {
       console.error("Error starting chat:", error);
     }  };
+
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowDown") {
+        setSelectedIndex((prevIndex) =>
+          prevIndex < users.length - 1 ? prevIndex + 1 : prevIndex
+        );
+      } else if (e.key === "ArrowUp") {
+        setSelectedIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : prevIndex));
+      } else if (e.key === "Enter" && selectedIndex >= 0) {
+        handleUserClick(users[selectedIndex]);
+      }
+    };
+  
+  
   
   const handleSearch = async (e) => {
     setSearchTerm(e.target.value);
@@ -91,6 +106,7 @@ const SearchChats = ({ isNew = false  }) => {
         <input
           type="text"
           value={searchTerm}
+          onKeyDown={handleKeyDown}
           onChange={handleSearch}
           placeholder="Search for users to chat with..."
           className="w-full py-2 px-4 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-indigo-300 focus:border-indigo-500"
@@ -106,11 +122,12 @@ const SearchChats = ({ isNew = false  }) => {
 
       {/* Display Users */}
       <ul className="mt-4">
-        {users.map((user) => (
+        {users.map((user, index) => (
           <li
             key={user._id}
+            onMouseEnter={() => setSelectedIndex(index)}
             onClick={() => handleUserClick(user)}
-            className={`py-2 hover:bg-yellow-200 hover:border-black border-2 hover:cursor-pointer p-2`}
+            className={`py-2 ${selectedIndex === index ? 'bg-yellow-200 border-black ': ' '} border-2 p-2`}
           >
             <span> <b>{user.username}</b></span> ({user.email})
           </li>
@@ -131,6 +148,7 @@ const SearchChats = ({ isNew = false  }) => {
     <input
       type="text"
       value={searchTerm}
+      onKeyDown={handleKeyDown}
       onChange={handleSearch}
       placeholder="Search for users to chat with..."
       className="w-full py-2 px-4 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-indigo-300 focus:border-indigo-500"
@@ -146,11 +164,12 @@ const SearchChats = ({ isNew = false  }) => {
 
   {/* Display Users */}
   <ul className="mt-4">
-    {users.map((user) => (
+    {users.map((user, index) => (
       <li
         key={user._id}
+        onMouseEnter={() => setSelectedIndex(index)}
         onClick={() => handleUserClick(user)}
-        className="p-2 hover:bg-yellow-500 hover:cursor-pointer"
+        className={`py-2 ${selectedIndex === index ? 'bg-yellow-200 border-black ': ' '} border-2 p-2`}
       >
         {user.username} ({user.email})
       </li>
