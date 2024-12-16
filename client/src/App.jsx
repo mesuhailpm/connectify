@@ -37,7 +37,11 @@ function App() {
 
 
   return (
-    <div className="app relative flex flex-col bg-primary/50 border-4 w-full overflow-hidden border-red-700 px-2 h-full">
+    <>
+      <div className="md:hidden flex items-center justify-center h-full">
+        <h2 className="text-center text-2xl font-bold text-primary">Not Viewable on Mobile. Please Use a Larger Screen.</h2>
+      </div>
+    <div className="app hidden relative md:flex flex-col bg-primary/50 border-4 w-full overflow-hidden border-red-700 px-2 h-full">
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -48,7 +52,7 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-      />
+        />
       {chatError ||
         (authError && (
           <div className="fixed font-bold text-center text-2xl bg-yellow-500 p-2">
@@ -73,7 +77,7 @@ function App() {
                 <Chats />
               )
             }
-          />
+            />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/help" element={<Help />} />
           <Route path="/about" element={<About />} />
@@ -82,6 +86,7 @@ function App() {
 
       <Footer />
     </div>
+ </>
   );
 }
 
