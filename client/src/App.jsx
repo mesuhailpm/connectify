@@ -6,23 +6,43 @@ import Chats from "./containers/Chats";
 import Home from "./containers/Home";
 import Help from "./containers/Help";
 import "./App.css";
-import { Provider, useDispatch, useSelector } from "react-redux";
-import { Route, Routes, Navigate } from "react-router-dom";
+import {  useDispatch, useSelector } from "react-redux";
+import {
+  Route,
+  Routes,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import "./App.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { loadUserFromToken } from "./actions/authActions";
 import SignedInIndicator from "./components/SignedIndicator";
 import About from "./containers/About";
 import socket from "./sockets/socket";
+import { RECEIVE_MESSAGE } from "./constants/actionTypes";
+import incomingTone from "./assets/media/ding.mp3";
 
 function App() {
   const dispatch = useDispatch();
-  const { isAuthenticated, loading,user } = useSelector((state) => state.auth);
-
+  const location = useLocation();
+  const { isAuthenticated, loading, user } = useSelector((state) => state.auth);
+  const [userInteracted, setUserInteracted] = useState(false);
   const { error: chatError } = useSelector((state) => state.chat);
   const { error: authError } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      setUserInteracted(true);
+      document.removeEventListener("click", handleUserInteraction);
+    };
+    document.addEventListener("click", handleUserInteraction);
+    return () => {
+      document.removeEventListener("click", handleUserInteraction);
+    };
+  }, []);
+
   useEffect(() => {
     dispatch(loadUserFromToken()); // Load the user from the token on app load
   }, [dispatch, loading]);
@@ -34,7 +54,57 @@ function App() {
     }
   }, [user]);
 
+  useEffect(() => {
+    // Listen for incoming messages from the server
+    socket.on("receiveMessage", (message) => {
+      const {
+        chat,
+        content,
+        sender,
+        status,
+        updatedAt,
+        createdAt,
+        readBy,
+        _id,
+      } = message;
+      console.log("Received a new message from server:", message);
 
+      const convertMessage = () => {
+        try {
+          return {
+            chat,
+            content,
+            createdAt,
+            updatedAt,
+            readBy,
+            sender,
+            status,
+            _id,
+          };
+        } catch (error) {
+          console.log("unable to convert message to state", error);
+          return {};
+        }
+      };
+      const messageForState = convertMessage();
+      // You can update the message state here, e.g., push to messages
+      dispatch({
+        type: RECEIVE_MESSAGE,
+        payload: messageForState,
+        isOnChatsPage: location.pathname === "/chats" ? true : false,
+      });
+      if (userInteracted) {
+        const audio = new Audio(incomingTone);
+        audio.play();
+      } else {
+        alert("You have a notification!");
+      }
+    });
+
+    return () => {
+      socket.off("receiveMessage");
+    };
+  }, [userInteracted, location.pathname, dispatch]);
 
   return (
     <>
