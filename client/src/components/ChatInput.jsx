@@ -3,7 +3,6 @@ import mongoose, { Types } from "mongoose";
 import { GrSend } from "react-icons/gr";
 import { toast } from "react-toastify";
 import outgoingTone from  '../assets/media/ping.mp3'
-import incomingTone from  '../assets/media/ding.mp3'
 import {
   SEND_MESSAGE_SUCCESS,
   SEND_MESSAGE_FAILURE,
@@ -30,50 +29,7 @@ function ChatInput() {
     chatInputRef.current.focus();
   }, [isSending]);
 
-  useEffect(() => {
-    // Listen for incoming messages from the server
-    socket.on("receiveMessage", (message) => {
-      const {
-        chat,
-        content,
-        sender,
-        status,
-        updatedAt,
-        createdAt,
-        readBy,
-        _id,
-      } = message;
-      console.log("Received a new message from server:", message);
-
-      const convertMessage = () => {
-        try {
-          return {
-            chat,
-            content,
-            createdAt,
-            updatedAt,
-            readBy,
-            sender,
-            status,
-            _id,
-          };
-        } catch (error) {
-          console.log("unable to convert message to state", error);
-          return {};
-        }
-      };
-      const messageForState = convertMessage();
-      // You can update the message state here, e.g., push to messages
-      dispatch({ type: RECEIVE_MESSAGE, payload: messageForState });
-      const audio = new Audio(incomingTone);
-      audio.play();
-    });
-
-    return () => {
-      socket.off("receiveMessage");
-    };
-  }, []);
-
+  // 7
   useEffect(() => {
     // Listen for messages failure from the server
     socket.on("sendMessageFailure", (messageId) => {

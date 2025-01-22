@@ -18,7 +18,9 @@ import {
   MESSAGE_READ_CONFIRMATION ,
   MESSAGE_READ_BY_SELF ,
   UPDATE_CHAT_PARTNER,
-  LOGOUT
+  LOGOUT,
+  INITILAIZE_SELECT_CHAT,
+  UPDATE_NOTIFICATION_NAME
 } from "../constants/actionTypes";
 
 const initialState = {
@@ -29,7 +31,8 @@ const initialState = {
   chatsLoading: false, // Loading status for fetching chats
   error: null, // Errors when fetching/sending messages
   sendingMessage: false, // Status for when a message is being sent
-  getChatMessagesError: null
+  getChatMessagesError: null,
+  unreadMessageNotifications: [],
 };
 
 const chatReducer = (state = initialState, action) => {
@@ -74,6 +77,17 @@ const chatReducer = (state = initialState, action) => {
       return {
         ...state,
         selectedChat: action.payload,
+        messages: [],
+        loading: false,
+      };
+    case INITILAIZE_SELECT_CHAT:
+      const completeChat = state.chats.find(
+        (chat) => chat._id === action.payload
+      );
+
+      return {
+        ...state,
+        selectedChat: completeChat,
         messages: [],
         loading: false,
       };
@@ -142,15 +156,73 @@ const chatReducer = (state = initialState, action) => {
         messages: [...state.messages.map((msg)=>msg._id === action.payload._id ? {...msg, status: 'sent'}: msg)], // Add the new message to the chat
       };
 
+    case RECEIVE_MESSAGE:
+      const isTheMessageInActiveChat = state.selectedChat?._id === action.payload.chat;
+
+      let unreadMessageNotifications = state.unreadMessageNotifications;
       
-      case RECEIVE_MESSAGE:
-        // alert( state.selectedChat._id,'state', action.payload.chatId,' dispatch')
-        return {
-          ...state,
-          messages: state.selectedChat._id === action.payload.chat ? [...state.messages, action.payload] : state.messages, // Add the new message to the chat], // Add the new message to the chat
-          chats: state.chats.map((chat) => chat._id === action.payload.chat ? {...chat, lastMessage: action.payload.content} : chat), // Update the last message of the chat
-        };
-  
+      if (!isTheMessageInActiveChat || !action.isOnChatsPage) {
+          const exisitingNotification = state.unreadMessageNotifications.find(
+        (notif) => notif.sender === action.payload.sender
+      );
+
+      const chat = state.chats.find((chat) => chat._id === action.payload.chat);
+
+      unreadMessageNotifications = exisitingNotification
+        ? state.unreadMessageNotifications.map((notif) =>
+            notif.sender === action.payload.sender
+              ?
+              
+               {
+                  ...notif,
+                  label: action.payload.content,
+                  moreMessageCount: exisitingNotification.moreMessageCount + 1,
+                  name: chat.username
+                }
+              : notif
+          )
+        : [
+            ...state.unreadMessageNotifications,
+            {
+              label: action.payload.content,
+              sender: action.payload.sender,
+              moreMessageCount: 0,
+              chat: action.payload.chat,
+              name: chat?.username,
+              avatar: chat?.avatar
+            },
+          ];}
+      return {
+        ...state,
+        // Add the new message to the chat
+        messages:
+          state.selectedChat?._id === action.payload.chat
+            ? [...state.messages, action.payload]
+            : state.messages, 
+        // Update the last message of the chat
+        chats: state.chats?.map((chat) =>
+          chat._id === action.payload.chat
+            ? { ...chat, lastMessage: action.payload.content }
+            : chat
+        ),
+
+        unreadMessageNotifications : (isTheMessageInActiveChat && action.isOnChatsPage) ? state.unreadMessageNotifications : unreadMessageNotifications
+      };
+
+    
+    case UPDATE_NOTIFICATION_NAME:
+      return {
+        ...state,
+        unreadMessageNotifications: state.unreadMessageNotifications.map((notif) => {
+          if (notif.sender === action.payload.sender) {
+            return {
+              ...notif,
+              name: action.payload.name,
+            };
+          }
+          return notif;
+        }),
+      };
     case SEND_MESSAGE_FAILURE:
       return {
         ...state,

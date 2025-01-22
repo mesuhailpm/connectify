@@ -22,3 +22,12 @@ exports.searchUsers = async (req, res) => {
       .json({ success: false, message: "Error searching users", error });
   }
 };
+exports.fetchUserName = async (req, res) => {
+  try {
+      const user = await User.findById(req.params.id).select('username')  
+      res.json({ success: true, name: user.username });
+  } catch (error) {
+      console.log(error)
+      res.json({ success: false, message: "User not found", error });
+  }
+}
