@@ -23,10 +23,12 @@ import About from "./containers/About";
 import socket from "./sockets/socket";
 import { RECEIVE_MESSAGE } from "./constants/actionTypes";
 import incomingTone from "./assets/media/ding.mp3";
+import { fetchUnreadMessageNotifications } from "./actions/messageNotificationActions";
 
 function App() {
   const dispatch = useDispatch();
   const location = useLocation();
+  const { chats } = useSelector((state) => state.chat);
   const { isAuthenticated, loading, user } = useSelector((state) => state.auth);
   const [userInteracted, setUserInteracted] = useState(false);
   const { error: chatError } = useSelector((state) => state.chat);
@@ -53,6 +55,15 @@ function App() {
       socket.emit("user-connected", user._id.toString());
     }
   }, [user]);
+
+  useEffect(() => {
+        const isOnChatsPage = location.pathname === "/chats" ? true : false
+      
+    if (isAuthenticated) {
+      dispatch(fetchUnreadMessageNotifications(user._id,isOnChatsPage))
+    }
+  }, [isAuthenticated, dispatch, chats]);
+  
 
   useEffect(() => {
     // Listen for incoming messages from the server

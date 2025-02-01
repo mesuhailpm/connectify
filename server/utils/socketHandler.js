@@ -2,6 +2,7 @@ const User = require('../models/User'); // Replace with your actual User model
 const Message = require('../models/Message');
 const Chat = require('../models/Chat');
 const mongoose = require('mongoose');
+const Notification = require('../models/Notification');
 
 /**
  * @param {'connect' | 'disconnect'} type - The type of event
@@ -139,6 +140,14 @@ const saveMessageToDatabase = async (io, users,{ chat, content, userId, _id, tar
         { lastMessage: newMessage._id },
         { session: mongooseSession }
       );
+
+      const notification = await Notification.create({
+        sender: userId,
+        recipient: target,
+        content,
+        chat,
+      });
+    
       const senderSocketId = users[userId];
       
       if(senderSocketId){

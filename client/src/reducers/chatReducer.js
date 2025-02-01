@@ -20,6 +20,7 @@ import {
   UPDATE_CHAT_PARTNER,
   LOGOUT,
   INITILAIZE_SELECT_CHAT,
+  FETCH_MESSAGE_NOTIFICATION_FROM_DATABASE,
   MARK_ONE_MESSAGE_NOTIFICATION_AS_READ
 } from "../constants/actionTypes";
 
@@ -224,20 +225,7 @@ const chatReducer = (state = initialState, action) => {
         unreadMessageNotifications : (isTheMessageInActiveChat && action.isOnChatsPage) ? state.unreadMessageNotifications : unreadMessageNotifications
       };
 
-    
-    case UPDATE_NOTIFICATION_NAME:
-      return {
-        ...state,
-        unreadMessageNotifications: state.unreadMessageNotifications.map((notif) => {
-          if (notif.sender === action.payload.sender) {
-            return {
-              ...notif,
-              name: action.payload.name,
-            };
-          }
-          return notif;
-        }),
-      };
+        
     case SEND_MESSAGE_FAILURE:
       return {
         ...state,
@@ -259,8 +247,8 @@ const chatReducer = (state = initialState, action) => {
     case MESSAGE_READ_BY_SELF :
     return {  
       ...state,
-        messages: state.messages.map((msg) => msg._id === action.payload.messageId ? {...msg, readBy: [...msg.readBy, action.payload.readerId]} : msg) 
-      
+        messages: state.messages.map((msg) => msg._id === action.payload.messageId ? {...msg, readBy: [...msg.readBy, action.payload.readerId]} : msg), 
+        unreadMessageNotifications: state.unreadMessageNotifications.map((notif) => notif.chat === action.payload.chatId ? {...notif, isRead: true}:{...notif})
       };
     case UPDATE_MESSAGE_STATUS: // For updating read, delivered, sent status
       return {
