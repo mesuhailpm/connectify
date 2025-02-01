@@ -15,10 +15,38 @@ const SignedInIndicator = () => {
   );
   const navigate = useNavigate();
   const [showNotification, setShowNotification] = useState(false);
-  console.log({ chats, unreadMessageNotifications });
-
-  const handleSelectChat = async (chat) => {
+  const handleMarkAsRead = async (e, notificationId) => {
+    e.stopPropagation()
     try {
+      await markNotificationAsReadInDb({userId: user._id, notificationId: notificationId});
+      dispatch({type: MARK_ONE_MESSAGE_NOTIFICATION_AS_READ, payload: notificationId})
+      
+    } catch (error) {
+      toast.error('Failed to mark as read', {autoClose: 2000})
+    }
+    
+  }
+
+  const handleSelectChat = async (chat,notificationId) => {
+
+    try {
+      // same chat is selected and the user in in chat page - do nothing for marking in DB. instead, update the global state
+      if (selectedChat?._id === chat && location.pathname === "/chats") {
+        dispatch({type: MARK_ONE_MESSAGE_NOTIFICATION_AS_READ, payload: notificationId})
+      
+        setShowNotification(false);
+        return;
+      }
+      // same chat is selected but user is not in chat page  - redirect to /chats
+      await markNotificationAsReadInDb({userId: user._id, notificationId: notificationId});
+
+      if (selectedChat?._id === chat){
+
+        dispatch({ type: INITILAIZE_SELECT_CHAT, payload: null });
+        dispatch({ type: INITILAIZE_SELECT_CHAT, payload: chat });
+      
+    } else {
+        // same chat is not selected and user is in chat page
       dispatch({ type: INITILAIZE_SELECT_CHAT, payload: chat });
       setShowNotification(false);
       // navigate("/chats");

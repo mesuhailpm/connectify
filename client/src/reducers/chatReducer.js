@@ -20,7 +20,7 @@ import {
   UPDATE_CHAT_PARTNER,
   LOGOUT,
   INITILAIZE_SELECT_CHAT,
-  UPDATE_NOTIFICATION_NAME
+  MARK_ONE_MESSAGE_NOTIFICATION_AS_READ
 } from "../constants/actionTypes";
 
 const initialState = {
@@ -40,6 +40,21 @@ const chatReducer = (state = initialState, action) => {
     console.log(action);
   }
   switch (action.type) {
+
+    case MARK_ONE_MESSAGE_NOTIFICATION_AS_READ:
+
+      return {
+        ...state,
+        unreadMessageNotifications: state.unreadMessageNotifications.map((el)=>(el._id === action.payload ? {...el, isRead: true} : el))
+      }
+
+    case FETCH_MESSAGE_NOTIFICATION_FROM_DATABASE:
+
+      return {
+        ...state,
+        unreadMessageNotifications : action.payload
+      };
+    
     case FETCH_CHATS_REQUEST:
       return {
         ...state,

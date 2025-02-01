@@ -43,7 +43,7 @@ router.put('/markOneAsRead/:userId/:notificationId', async (req, res) => {
 router.put('/markOneAsReadByChatId/:userId/:chatId', async (req, res) => {
     try { console.log('first')
         const { userId, chatId } = req.params;
-        await Notification.updateOne({ recipient: userId, chat: chatId }, { isRead: true });
+        await Notification.updateMany({ recipient: userId, chat: chatId }, { isRead: true });
         res.status(200).json({ message: 'Notification marked as read' });
     } catch (error) {
         console.log(error)
