@@ -1,20 +1,29 @@
 // src/components/SignedInIndicator.js
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../actions/authActions";
 import { MdMessage, MdMarkEmailRead } from "react-icons/md";
-import API from "../api";
-import { INITILAIZE_SELECT_CHAT, UPDATE_NOTIFICATION_NAME } from "../constants/actionTypes";
-
+import { IoMailOpen } from "react-icons/io5";
+import { INITILAIZE_SELECT_CHAT, MARK_ONE_MESSAGE_NOTIFICATION_AS_READ } from "../constants/actionTypes";
+import { markNotificationAsReadInDb } from "../actions/messageNotificationActions";
+import { toast } from "react-toastify";
 const SignedInIndicator = () => {
   const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
-  const { chats, unreadMessageNotifications } = useSelector(
+  const { unreadMessageNotifications, selectedChat } = useSelector(
     (state) => state.chat
   );
   const navigate = useNavigate();
+  const location = useLocation()
   const [showNotification, setShowNotification] = useState(false);
+  const [actuallyUnreadMessageNotifications, setActuallyUnreadMessageNotifications] = useState([])
+  
+  useEffect(() => {
+    if (unreadMessageNotifications.length) {
+      setActuallyUnreadMessageNotifications(unreadMessageNotifications.filter((el)=> {return  !el.isRead}));
+    }
+  }, [unreadMessageNotifications]);
   const handleMarkAsRead = async (e, notificationId) => {
     e.stopPropagation()
     try {
@@ -47,11 +56,19 @@ const SignedInIndicator = () => {
       
     } else {
         // same chat is not selected and user is in chat page
-      dispatch({ type: INITILAIZE_SELECT_CHAT, payload: chat });
+        dispatch({ type: INITILAIZE_SELECT_CHAT, payload: chat });
+      
+    }
+    //same chat not selected and the user in not in chat page
+      
+      if (location.pathname !== "/chats" ){
+        navigate("/chats")
+      }
+
       setShowNotification(false);
-      // navigate("/chats");
+
     } catch (error) {
-      console.log(error)
+      toast.error('Something went wrong!'+error?.message)
     }
   };
 
@@ -60,30 +77,14 @@ const SignedInIndicator = () => {
     navigate("/login"); // Redirect to login page after logout
   };
 
-  useEffect(() => {
-    if (Notification.permission === "default") {
-    }
-  }, []);
 
   const toggleShowNotification = async () => {
-    // alert(loading)
-    if (true) {
-      //handle also when there are no unread messages
+
       setShowNotification((prev) => {
         return !prev;
       });
-      unreadMessageNotifications.forEach(async (el) => {
-        if (!el.name) {
-          const data = await API.get("/api/users/name/" + el.sender);
-          console.log(data);
-          dispatch({
-            type: UPDATE_NOTIFICATION_NAME,
-            payload: { sender: el.sender, name: data.data.name },
-          });        }
-      });
-    }
+  
   };
-  console.log(showNotification);
 
   if (!isAuthenticated) {
     return (
@@ -144,12 +145,12 @@ const SignedInIndicator = () => {
           >
             <MdMessage className={`text-4xl relative hover:text-white/90`} />
 
-            {unreadMessageNotifications.length ? (
+            {actuallyUnreadMessageNotifications.length ? (
               <div
                 className="rounded-full absolute -top-1 -right-1 flex justify-center items-center bg-fuchsia-500 border-2 p-[2px] min-w-[2rem] w-auto h-auto text-sm"
                 style={{ aspectRatio: "1 / 1" }}
               >
-                {unreadMessageNotifications.length}
+                {actuallyUnreadMessageNotifications.length}
               </div>
             ) : null}
           </button>
@@ -162,20 +163,22 @@ const SignedInIndicator = () => {
                 {unreadMessageNotifications.map((el, index) => (
                   <li
                     key={index}
-                    className="px-4 py-2 bg-secondary border-primary/5 border-2 hover:bg-gray-100 hover:text-black cursor-pointer"
+                    className={`relative hover-item px-4 py-2 ${el.isRead ? 'bg-secondary':'bg-blue-500/50'}  border-primary/5 border-2 hover:bg-gray-100 hover:text-black cursor-pointer`}
                     onClick={() => {
-                      handleSelectChat(el.chat);
+                      handleSelectChat(el.chat,el._id);
                     }}
-                  >
-                    <div className="flex gap-2 items-center justifyd-evenly max-h-[50px]">
+                  > <div className={`icon-container${el.isRead ? '-hidden' : ''} absolute top-0 flex justify-center items-center rounded-r-lg p-1 left-full h-full bg-white`}>
+                      <IoMailOpen onClick={(e) => handleMarkAsRead(e, el._id)} className=" text-xl text-green-500 left-full top-1/3" />
+                  </div>
+                    <div className="flex gap-2 items-center max-h-[50px]">
                       <div className="flex gap-1 justify-center items-center w-1/3 left">
                         <img src={el.avatar} alt="avatar" width={35} className="rounded-full" /> 
                         <b> {el.name.split(" ")[0]} </b>
                       </div>
-                      <div className="max-h-full max-w- overflow-auto hide-scrollbar">
+                      <div className="max-h-full max-w- overflow-auto hide-scrollbar right relative">
 
 
-                    <p className="whitespace-nowrap">{el.label.slice(0, 25)+'...'}</p>
+                    <p className="whitespace-nowrap">{el.label.slice(0, 25)+ (el.label.length > 24 ? '...':'')}</p>
                       </div>
                     {el.moreMessageCount ? (
                       <span className="font-bold text-xl ml-4">
