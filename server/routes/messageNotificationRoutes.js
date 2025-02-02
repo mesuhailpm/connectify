@@ -51,3 +51,5 @@ router.put('/markOneAsReadByChatId/:userId/:chatId', async (req, res) => {
     }
 });
 
+
+module.exports = router;
