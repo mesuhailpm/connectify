@@ -52,4 +52,17 @@ router.put('/markOneAsReadByChatId/:userId/:chatId', async (req, res) => {
 });
 
 
+// PUT /api/messageNotifications/:userId/markAsRead
+router.put('/:userId/markAsRead', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        await Notification.updateMany({ recipient: userId, isRead: false }, { isRead: true });
+        res.status(200).json({ message: 'Notifications marked as read' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error', error });
+    }
+});
+
+
+
 module.exports = router;

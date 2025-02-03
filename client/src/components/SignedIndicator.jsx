@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../actions/authActions";
+import { markAllNotificationsAsReadInDb } from "../actions/messageNotificationActions";
 import { MdMessage, MdMarkEmailRead } from "react-icons/md";
 import { IoMailOpen } from "react-icons/io5";
 import { INITILAIZE_SELECT_CHAT, MARK_ONE_MESSAGE_NOTIFICATION_AS_READ } from "../constants/actionTypes";
@@ -24,6 +25,14 @@ const SignedInIndicator = () => {
       setActuallyUnreadMessageNotifications(unreadMessageNotifications.filter((el)=> {return  !el.isRead}));
     }
   }, [unreadMessageNotifications]);
+
+  const handleMarkAllAsRead = async () => {
+    try {
+     dispatch(markAllNotificationsAsReadInDb(user._id));
+  } catch (error) {
+    toast.error('Failed to mark all as read', {autoClose: 2000})
+  }}
+  
   const handleMarkAsRead = async (e, notificationId) => {
     e.stopPropagation()
     try {
@@ -158,7 +167,7 @@ const SignedInIndicator = () => {
           {showNotification ? (
             <div style={{ animation: 'fadeIn 0.3s forwards' }} className="absolute top-full mt-2 right-0 w-72 bg-primary border border-gray-300 rounded-lg shadow-lg">
               <div className="absolute top-0 right-4 -mt-2 w-4 h-4 bg-primary border-l border-t border-gray-300 rotate-45"></div>
-              {unreadMessageNotifications.length ? (
+              {unreadMessageNotifications.length ? (<>
               <ul className="py-2 relative z-10">
                 {unreadMessageNotifications.map((el, index) => (
                   <li
@@ -190,7 +199,10 @@ const SignedInIndicator = () => {
                     </div>
                   </li>
                 ))}
-              </ul>): (<div className="flex flex-col items-center justify-center p-4">
+              </ul>
+              <button onClick={handleMarkAllAsRead} className="flex w-full items-center justify-center hover:bg-white hover:text-black text-white-950">Mark All As Read</button >
+              </>
+              ): (<div className="flex flex-col items-center justify-center p-4">
               <MdMarkEmailRead  className="text-3xl"/>
                 <p className="text-center">No new messages</p>
               </div>)

@@ -21,7 +21,8 @@ import {
   LOGOUT,
   INITILAIZE_SELECT_CHAT,
   FETCH_MESSAGE_NOTIFICATION_FROM_DATABASE,
-  MARK_ONE_MESSAGE_NOTIFICATION_AS_READ
+  MARK_ONE_MESSAGE_NOTIFICATION_AS_READ,
+  MARK_ALL_MESSAGE_NOTIFICATIONS_AS_READ
 } from "../constants/actionTypes";
 
 const initialState = {
@@ -47,6 +48,12 @@ const chatReducer = (state = initialState, action) => {
       return {
         ...state,
         unreadMessageNotifications: state.unreadMessageNotifications.map((el)=>(el._id === action.payload ? {...el, isRead: true} : el))
+      }
+
+    case MARK_ALL_MESSAGE_NOTIFICATIONS_AS_READ: 
+      return {
+        ...state,
+        unreadMessageNotifications: state.unreadMessageNotifications.map((el)=>({...el, isRead: true}))
       }
 
     case FETCH_MESSAGE_NOTIFICATION_FROM_DATABASE:

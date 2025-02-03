@@ -1,5 +1,5 @@
 import API from "../api";
-import { FETCH_MESSAGE_NOTIFICATION_FROM_DATABASE } from "../constants/actionTypes";
+import { FETCH_MESSAGE_NOTIFICATION_FROM_DATABASE, MARK_ALL_MESSAGE_NOTIFICATIONS_AS_READ } from "../constants/actionTypes";
 
 export const fetchUnreadMessageNotifications = (userId, isOnChatsPage) => async (dispatch)=> {
     try{
@@ -36,5 +36,18 @@ export const markNotificationAsReadInDb = async ({userId, notificationId}) => {
       throw error;    
     }
     
+  }
+
+  export const markAllNotificationsAsReadInDb = async (userId) => async (dispatch) => {
+    try { 
+      const {data} = await API.put(
+        "/api/messageNotifications/"+userId+"/markAsRead"
+      );
+      console.log(data)
+      await dispatch({type: MARK_ALL_MESSAGE_NOTIFICATIONS_AS_READ});
+    } catch (error) {
+      console.log('error inside markAllNotificationsAsReadInDb ',error)
+      throw error;    
+    }
   }
   
