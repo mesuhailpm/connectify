@@ -18,6 +18,12 @@ router.get("/chats/:userId", async (req, res) => {
       res.status(500).json({ error: "Error fetching chats" });
     }
   });
+
+// api/chats/muteChat/${userId}/${chatId}
+router.put('/muteChat/:userId/:chatId', authMiddleware.protect, chatController.muteChat)
+
+// api/chats/unmuteChat/${userId}/${chatId}
+router.put('/unmuteChat/:userId/:chatId', authMiddleware.protect, chatController.unmuteChat)
   
   
 
