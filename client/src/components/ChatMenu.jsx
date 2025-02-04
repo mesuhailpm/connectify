@@ -10,14 +10,25 @@ import {
   FaUsers,
   FaPaperclip,
   FaImage,
+  FaBellSlash
 } from "react-icons/fa";
 
 import ChatMenuButton from "../components/ChatMenuButton";
 import { useDispatch, useSelector } from "react-redux";
 import socket from "../sockets/socket.js";
+import { muteChat, unmuteChat } from "../actions/chatActions.js";
+import { toast } from "react-toastify";
 
 const ChatMenu = () => {
   const { selectedChat } = useSelector((state) => state.chat);
+  const { user } = useSelector((state) => state.auth);
+  const [isChatOnMute, serIsChatOnMute] = useState(selectedChat.dndUsers.some((usr)=>usr === user._id))
+
+
+  useEffect(()=>{
+    if(user)serIsChatOnMute(selectedChat.dndUsers.some((usr)=>usr === user._id))
+
+  },[selectedChat.dndUsers, user._id])
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -51,8 +62,18 @@ const ChatMenu = () => {
   }, [dispatch, selectedChat.recipient]);
 
   // const chatPartner = selectedChat.participants
-  const handleMuteNotifications = () => {
-    console.log("Notifications muted");
+  const handleMuteNotifications = async () => {
+    try {
+      
+      if(isChatOnMute){
+        await dispatch(unmuteChat({userId: user._id, chatId: selectedChat._id}))
+        
+      }else{
+        await dispatch(muteChat({userId: user._id, chatId: selectedChat._id}))
+      }
+    } catch (error) {
+     toast.error('Action failed') 
+    }
   };
 
   const handleBlockUser = () => {
@@ -112,8 +133,8 @@ const ChatMenu = () => {
         className="p-2 mb-4 w-full rounded-md bg-gray-300 placeholder:text-gray-500"
       />
       <ChatMenuButton
-        label="Mute Notifications"
-        icon={<FaBell />}
+        label={`${isChatOnMute ? "Unmute" : "Mute Notifications"}`}
+        icon={isChatOnMute ? <FaBell />: <FaBellSlash className="text-2xl"/>}
         style="bg-primary"
         onClick={handleMuteNotifications}
       />

@@ -28,7 +28,7 @@ import { fetchUnreadMessageNotifications } from "./actions/messageNotificationAc
 function App() {
   const dispatch = useDispatch();
   const location = useLocation();
-  const { chats } = useSelector((state) => state.chat);
+  const { chats, mutedChats } = useSelector((state) => state.chat);
   const { isAuthenticated, loading, user } = useSelector((state) => state.auth);
   const [userInteracted, setUserInteracted] = useState(false);
   const { error: chatError } = useSelector((state) => state.chat);
@@ -104,12 +104,20 @@ function App() {
         payload: messageForState,
         isOnChatsPage: location.pathname === "/chats" ? true : false,
       });
-      if (userInteracted) {
-        const audio = new Audio(incomingTone);
-        audio.play();
-      } else {
-        alert("You have a notification!");
-      }
+
+      const isChatMuted = mutedChats.some((chat) => chat === message.chat);
+      if (!isChatMuted) {
+        
+        if (userInteracted) {
+          const audio = new Audio(incomingTone);
+          audio.play();
+          return
+        } 
+          alert("You have a notification!");
+        
+      };
+      
+      
     });
 
     return () => {

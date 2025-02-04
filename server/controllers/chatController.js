@@ -58,6 +58,7 @@ exports.getChats = async (req, res) => {
         updatedAt: chat.updatedAt,
         isOnline: otherParticipant.isOnline,
         lastSeen: otherParticipant.lastSeen,
+        dndUsers: chat.dndUsers
       };
     });
 
