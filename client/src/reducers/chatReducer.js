@@ -22,7 +22,9 @@ import {
   INITILAIZE_SELECT_CHAT,
   FETCH_MESSAGE_NOTIFICATION_FROM_DATABASE,
   MARK_ONE_MESSAGE_NOTIFICATION_AS_READ,
-  MARK_ALL_MESSAGE_NOTIFICATIONS_AS_READ
+  MARK_ALL_MESSAGE_NOTIFICATIONS_AS_READ,
+  MUTE_CHAT,
+  UNMUTE_CHAT
 } from "../constants/actionTypes";
 
 const initialState = {
@@ -35,6 +37,7 @@ const initialState = {
   sendingMessage: false, // Status for when a message is being sent
   getChatMessagesError: null,
   unreadMessageNotifications: [],
+  mutedChats:[]
 };
 
 const chatReducer = (state = initialState, action) => {
@@ -48,6 +51,23 @@ const chatReducer = (state = initialState, action) => {
       return {
         ...state,
         unreadMessageNotifications: state.unreadMessageNotifications.map((el)=>(el._id === action.payload ? {...el, isRead: true} : el))
+      }
+
+    case MUTE_CHAT:
+      console.log(state)
+      return {
+        ...state,
+        mutedChats: [...state.mutedChats, action.payload.chatId],
+        selectedChat: {...state.selectedChat, dndUsers: [...state.selectedChat.dndUsers, action.payload.userId]}
+      }
+    
+    case UNMUTE_CHAT:
+      console.log(state)
+
+      return {
+        ...state,
+        mutedChats: [...state.mutedChats.filter((chat)=> chat !== action.payload.chatId)],
+        selectedChat: {...state.selectedChat, dndUsers: [...state.selectedChat.dndUsers.filter((usr)=>usr !== action.payload.userId)]}
       }
 
     case MARK_ALL_MESSAGE_NOTIFICATIONS_AS_READ: 
@@ -74,7 +94,8 @@ const chatReducer = (state = initialState, action) => {
       return {
         ...state,
         chatsLoading: false,
-        chats: action.payload, //was .chats
+        chats: action.payload.data,
+        mutedChats: action.payload.data.filter((chat)=> chat.dndUsers.includes(action.payload.userId)).map((chat)=> chat._id),
       };
 
     case FETCH_MORE_CHAT_SUCCESS:
