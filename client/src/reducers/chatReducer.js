@@ -20,7 +20,11 @@ import {
   UPDATE_CHAT_PARTNER,
   LOGOUT,
   INITILAIZE_SELECT_CHAT,
-  UPDATE_NOTIFICATION_NAME
+  FETCH_MESSAGE_NOTIFICATION_FROM_DATABASE,
+  MARK_ONE_MESSAGE_NOTIFICATION_AS_READ,
+  MARK_ALL_MESSAGE_NOTIFICATIONS_AS_READ,
+  MUTE_CHAT,
+  UNMUTE_CHAT
 } from "../constants/actionTypes";
 
 const initialState = {
@@ -33,6 +37,7 @@ const initialState = {
   sendingMessage: false, // Status for when a message is being sent
   getChatMessagesError: null,
   unreadMessageNotifications: [],
+  mutedChats:[]
 };
 
 const chatReducer = (state = initialState, action) => {
@@ -40,6 +45,46 @@ const chatReducer = (state = initialState, action) => {
     console.log(action);
   }
   switch (action.type) {
+
+    case MARK_ONE_MESSAGE_NOTIFICATION_AS_READ:
+
+      return {
+        ...state,
+        unreadMessageNotifications: state.unreadMessageNotifications.map((el)=>(el._id === action.payload ? {...el, isRead: true} : el))
+      }
+
+    case MUTE_CHAT:
+      console.log(state)
+      return {
+        ...state,
+        mutedChats: [...state.mutedChats, action.payload.chatId],
+        selectedChat: {...state.selectedChat, dndUsers: [...state.selectedChat.dndUsers, action.payload.userId]},
+        chats: state.chats.map((chat)=> chat._id === action.payload.chatId ? {...chat, dndUsers: [...chat.dndUsers, action.payload.userId]} : chat)
+      }
+    
+    case UNMUTE_CHAT:
+      console.log(state)
+
+      return {
+        ...state,
+        mutedChats: [...state.mutedChats.filter((chat)=> chat !== action.payload.chatId)],
+        selectedChat: {...state.selectedChat, dndUsers: [...state.selectedChat.dndUsers.filter((usr)=>usr !== action.payload.userId)]},
+        chats: state.chats.map((chat)=> chat._id === action.payload.chatId ? {...chat, dndUsers: chat.dndUsers.filter((usr)=>usr !== action.payload.userId)} : chat)
+      }
+
+    case MARK_ALL_MESSAGE_NOTIFICATIONS_AS_READ: 
+      return {
+        ...state,
+        unreadMessageNotifications: state.unreadMessageNotifications.map((el)=>({...el, isRead: true}))
+      }
+
+    case FETCH_MESSAGE_NOTIFICATION_FROM_DATABASE:
+
+      return {
+        ...state,
+        unreadMessageNotifications : action.payload
+      };
+    
     case FETCH_CHATS_REQUEST:
       return {
         ...state,
@@ -51,7 +96,8 @@ const chatReducer = (state = initialState, action) => {
       return {
         ...state,
         chatsLoading: false,
-        chats: action.payload, //was .chats
+        chats: action.payload.data,
+        mutedChats: action.payload.data.filter((chat)=> chat.dndUsers.includes(action.payload.userId)).map((chat)=> chat._id),
       };
 
     case FETCH_MORE_CHAT_SUCCESS:
@@ -209,20 +255,7 @@ const chatReducer = (state = initialState, action) => {
         unreadMessageNotifications : (isTheMessageInActiveChat && action.isOnChatsPage) ? state.unreadMessageNotifications : unreadMessageNotifications
       };
 
-    
-    case UPDATE_NOTIFICATION_NAME:
-      return {
-        ...state,
-        unreadMessageNotifications: state.unreadMessageNotifications.map((notif) => {
-          if (notif.sender === action.payload.sender) {
-            return {
-              ...notif,
-              name: action.payload.name,
-            };
-          }
-          return notif;
-        }),
-      };
+        
     case SEND_MESSAGE_FAILURE:
       return {
         ...state,
@@ -244,8 +277,8 @@ const chatReducer = (state = initialState, action) => {
     case MESSAGE_READ_BY_SELF :
     return {  
       ...state,
-        messages: state.messages.map((msg) => msg._id === action.payload.messageId ? {...msg, readBy: [...msg.readBy, action.payload.readerId]} : msg) 
-      
+        messages: state.messages.map((msg) => msg._id === action.payload.messageId ? {...msg, readBy: [...msg.readBy, action.payload.readerId]} : msg), 
+        unreadMessageNotifications: state.unreadMessageNotifications.map((notif) => notif.chat === action.payload.chatId ? {...notif, isRead: true}:{...notif})
       };
     case UPDATE_MESSAGE_STATUS: // For updating read, delivered, sent status
       return {

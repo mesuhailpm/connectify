@@ -28,7 +28,7 @@ const Chats = () => {
         dispatch({ type: FETCH_CHATS_REQUEST });
         const { data } = await API.get("/api/chats");
         console.log(data.data);
-        dispatch({ type: FETCH_CHATS_SUCCESS, payload: data.data });
+        dispatch({ type: FETCH_CHATS_SUCCESS, payload: {data:data.data, userId: authState.user._id} });
       } catch (error) {
         console.log(error)
         dispatch({

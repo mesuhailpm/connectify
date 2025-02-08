@@ -1,4 +1,5 @@
 // chatActions.js
+import { toast } from "react-toastify";
 import API from "../api";
 import {
   FETCH_CHATS_FAILURE,
@@ -9,7 +10,9 @@ import {
   FETCH_MORE_CHAT_MESSAGES_SUCCESS,
   SEARCH_USERS_SUCCESS,
   SEARCH_USERS_REQUEST,
-  SEARCH_USERS_FAILURE
+  SEARCH_USERS_FAILURE,
+  MUTE_CHAT,
+  UNMUTE_CHAT
 } from "../constants/actionTypes.js";
 
 
@@ -41,3 +44,34 @@ export const fetchChatMessages = (chatId) => async (dispatch) => {
     dispatch({ type: FETCH_CHAT_MESSAGES_FAILURE, payload: error.message });
   }
 };
+
+export const muteChat = ({userId, chatId}) => async (dispatch) => {
+  try {
+    console.log('inside muteChat')
+
+    const {data} = await API.put(`api/chats/muteChat/${userId}/${chatId}`)
+    dispatch ({type: MUTE_CHAT, payload: {userId, chatId}})
+    toast.success(data.message)
+
+    
+  
+  } catch (error) {
+    toast.error('Action failed')
+    
+  }
+}
+
+export const unmuteChat = ({userId, chatId}) => async (dispatch) => {
+  try {
+    console.log('inside unmuteChat')
+    const {data} = await API.put(`api/chats/unmuteChat/${userId}/${chatId}`)
+    dispatch ({type: UNMUTE_CHAT, payload: {userId, chatId}})
+
+    toast.success(data.message)
+
+  
+  } catch (error) {
+    toast.error('Action failed')
+    
+  }
+}

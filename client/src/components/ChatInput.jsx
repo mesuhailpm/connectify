@@ -141,7 +141,7 @@ function ChatInput() {
       }
       try {
         // Listen for the response from the server
-        socket.on("sendMessageSuccess", async (message) => {
+        socket.once("sendMessageSuccess", async (message) => {
           console.log("New message sent successfully:", message);
           const {
             createdAt,

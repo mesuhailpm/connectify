@@ -58,6 +58,7 @@ exports.getChats = async (req, res) => {
         updatedAt: chat.updatedAt,
         isOnline: otherParticipant.isOnline,
         lastSeen: otherParticipant.lastSeen,
+        dndUsers: chat.dndUsers
       };
     });
 
@@ -270,3 +271,36 @@ exports.getChatMessages = async (req, res) => {
       .json({ success: false, message: "Error fetching messages", error });
   }
 };
+
+exports.muteChat = async (req, res) => {
+  try {
+    const {userId, chatId} = req.params; 
+    const updateadChat = await Chat.findByIdAndUpdate(chatId, { $addToSet: { dndUsers: userId }}, {new: true})
+
+    if (!updateadChat.dndUsers.some(el => el.toString() === userId)){
+      throw Error('Server Failed to Mute Notification!')
+    }
+    res.status(201).json({message: 'This chat is muted'})
+  } catch (error) {
+    console.log(error)
+    res.status(403).json({message: error?.message || 'something went wrong'})
+    
+  }
+}
+
+
+exports.unmuteChat = async (req, res) => {
+  try {
+    const {userId, chatId} = req.params;
+    const updateadChat = await Chat.findByIdAndUpdate(chatId, { $pull: { dndUsers: userId }}, {new: true})
+
+    if (updateadChat.dndUsers.some(el => el.toString() === userId)){
+      throw Error('Server Failed to unmute Notification!')
+    }
+    res.status(201).json({message: 'This chat is unmuted'})
+  } catch (error) {
+    console.log(error)
+    res.status(403).json({message: error?.message || 'something went wrong'})
+    
+  }
+}

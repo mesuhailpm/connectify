@@ -3,8 +3,8 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchChatMessages } from "../actions/chatActions";
+import { markNotificationForChatAsReadInDb } from "../actions/messageNotificationActions";
 import { FaCircle } from "react-icons/fa";
-import io from 'socket.io-client'
 import { MESSAGE_READ_BY_SELF  } from "../constants/actionTypes";
 
 import socket from "../sockets/socket";
@@ -33,12 +33,13 @@ const ChatPanel = () => {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        entries.forEach(async (entry) => {
           if (entry.isIntersecting) {
             const messageId = entry.target.getAttribute('data-id');
             if (messageId && !seenMessages.current.has(messageId)) { // Check if the message is not already seen
               seenMessages.current.add(messageId); // Mark the message as seen
               socket.emit('messageSeenByMe', { messageId, chatId: selectedChat._id, readerId: user._id });
+              await markNotificationForChatAsReadInDb({userId: user._id, chatId: selectedChat._id})
               dispatch({ type: MESSAGE_READ_BY_SELF , payload: { messageId, chatId: selectedChat._id, readerId: user._id }  });
             }
           }
@@ -55,7 +56,7 @@ const ChatPanel = () => {
     return () => {
       observer.disconnect(); // Ensures all observed elements are unobserved
     };
-  }, [selectedChat, socket,messages]);
+  }, [selectedChat, dispatch, user._id, messages]);
   
 
   useEffect(()=>{
@@ -71,7 +72,7 @@ const ChatPanel = () => {
       fetchMessagesByChat(selectedChat._id);
       console.log("useEffect to fetch messsages for chats");
     }
-  }, [selectedChat?._id]);
+  }, [selectedChat?._id, selectedChat, dispatch]);
 
   const groupMessagesByDate = (messages) => {
     return messages.reduce((acc, message) => {

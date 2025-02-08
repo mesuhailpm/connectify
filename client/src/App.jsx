@@ -23,10 +23,12 @@ import About from "./containers/About";
 import socket from "./sockets/socket";
 import { RECEIVE_MESSAGE } from "./constants/actionTypes";
 import incomingTone from "./assets/media/ding.mp3";
+import { fetchUnreadMessageNotifications } from "./actions/messageNotificationActions";
 
 function App() {
   const dispatch = useDispatch();
   const location = useLocation();
+  const { chats, mutedChats } = useSelector((state) => state.chat);
   const { isAuthenticated, loading, user } = useSelector((state) => state.auth);
   const [userInteracted, setUserInteracted] = useState(false);
   const { error: chatError } = useSelector((state) => state.chat);
@@ -53,6 +55,15 @@ function App() {
       socket.emit("user-connected", user._id.toString());
     }
   }, [user]);
+
+  useEffect(() => {
+        const isOnChatsPage = location.pathname === "/chats" ? true : false
+      
+    if (isAuthenticated) {
+      dispatch(fetchUnreadMessageNotifications(user._id,isOnChatsPage))
+    }
+  }, [isAuthenticated, dispatch, chats]);
+  
 
   useEffect(() => {
     // Listen for incoming messages from the server
@@ -93,18 +104,26 @@ function App() {
         payload: messageForState,
         isOnChatsPage: location.pathname === "/chats" ? true : false,
       });
-      if (userInteracted) {
-        const audio = new Audio(incomingTone);
-        audio.play();
-      } else {
-        alert("You have a notification!");
-      }
+
+      const isChatMuted = mutedChats.some((chat) => chat === message.chat);
+      if (!isChatMuted) {
+        
+        if (userInteracted) {
+          const audio = new Audio(incomingTone);
+          audio.play();
+          return
+        } 
+          alert("You have a notification!");
+        
+      };
+      
+      
     });
 
     return () => {
       socket.off("receiveMessage");
     };
-  }, [userInteracted, location.pathname, dispatch]);
+  }, [userInteracted, location.pathname, dispatch, mutedChats]);
 
   return (
     <>
