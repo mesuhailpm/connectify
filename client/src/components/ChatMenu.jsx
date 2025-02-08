@@ -23,7 +23,7 @@ const ChatMenu = () => {
   const { selectedChat } = useSelector((state) => state.chat);
   const { user } = useSelector((state) => state.auth);
   const [isChatOnMute, serIsChatOnMute] = useState(selectedChat.dndUsers.some((usr)=>usr === user._id))
-
+  const [muteLoading, setMuteLoading] = useState(false)
 
   useEffect(()=>{
     if(user)serIsChatOnMute(selectedChat.dndUsers.some((usr)=>usr === user._id))
@@ -64,6 +64,7 @@ const ChatMenu = () => {
   // const chatPartner = selectedChat.participants
   const handleMuteNotifications = async () => {
     try {
+      setMuteLoading(true)
       
       if(isChatOnMute){
         await dispatch(unmuteChat({userId: user._id, chatId: selectedChat._id}))
@@ -73,6 +74,8 @@ const ChatMenu = () => {
       }
     } catch (error) {
      toast.error('Action failed') 
+    }finally{
+      setMuteLoading(false)
     }
   };
 
@@ -133,10 +136,11 @@ const ChatMenu = () => {
         className="p-2 mb-4 w-full rounded-md bg-gray-300 placeholder:text-gray-500"
       />
       <ChatMenuButton
-        label={`${isChatOnMute ? "Unmute" : "Mute Notifications"}`}
-        icon={isChatOnMute ? <FaBell />: <FaBellSlash className="text-2xl"/>}
+        label={muteLoading ? "Loading..." : `${isChatOnMute ? "Unmute" : "Mute Notifications"}`}
+        icon={isChatOnMute ? <FaBell /> : <FaBellSlash className="text-2xl" />}
         style="bg-primary"
         onClick={handleMuteNotifications}
+        disabled={muteLoading}
       />
       <ChatMenuButton
         label="Block User"
