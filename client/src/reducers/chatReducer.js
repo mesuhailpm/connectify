@@ -58,7 +58,8 @@ const chatReducer = (state = initialState, action) => {
       return {
         ...state,
         mutedChats: [...state.mutedChats, action.payload.chatId],
-        selectedChat: {...state.selectedChat, dndUsers: [...state.selectedChat.dndUsers, action.payload.userId]}
+        selectedChat: {...state.selectedChat, dndUsers: [...state.selectedChat.dndUsers, action.payload.userId]},
+        chats: state.chats.map((chat)=> chat._id === action.payload.chatId ? {...chat, dndUsers: [...chat.dndUsers, action.payload.userId]} : chat)
       }
     
     case UNMUTE_CHAT:
@@ -67,7 +68,8 @@ const chatReducer = (state = initialState, action) => {
       return {
         ...state,
         mutedChats: [...state.mutedChats.filter((chat)=> chat !== action.payload.chatId)],
-        selectedChat: {...state.selectedChat, dndUsers: [...state.selectedChat.dndUsers.filter((usr)=>usr !== action.payload.userId)]}
+        selectedChat: {...state.selectedChat, dndUsers: [...state.selectedChat.dndUsers.filter((usr)=>usr !== action.payload.userId)]},
+        chats: state.chats.map((chat)=> chat._id === action.payload.chatId ? {...chat, dndUsers: chat.dndUsers.filter((usr)=>usr !== action.payload.userId)} : chat)
       }
 
     case MARK_ALL_MESSAGE_NOTIFICATIONS_AS_READ: 
