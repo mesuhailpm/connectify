@@ -123,7 +123,7 @@ function App() {
     return () => {
       socket.off("receiveMessage");
     };
-  }, [userInteracted, location.pathname, dispatch]);
+  }, [userInteracted, location.pathname, dispatch, mutedChats]);
 
   return (
     <>
