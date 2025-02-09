@@ -12,6 +12,7 @@ const userSchema = new Schema({
   contacts: [
     { type: Schema.Types.ObjectId, ref: 'User', default: [], required: true }
   ],
+  blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   isOnline: {
     type: Boolean,
     required: true,

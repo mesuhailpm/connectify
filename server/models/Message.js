@@ -9,7 +9,7 @@ const messageSchema = new Schema({
   readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],  // Users who read the message
   status: {
     type: String,
-    enum: ['sent', 'delivered', 'read'],
+    enum: ['sent','blocked', 'delivered', 'read'],
     default: 'sent',
   }
 }, { timestamps: true });

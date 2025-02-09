@@ -3,32 +3,42 @@ import { Link } from "react-router-dom";
 import getTimeDifference from "../utils/getTimeDifference.ts";
 import {
   FaBell,
-  FaUserSlash,
+  FaEye,
   FaTrash,
   FaFileDownload,
   FaFlag,
   FaUsers,
   FaPaperclip,
   FaImage,
-  FaBellSlash
+  FaBellSlash,
+  FaWindowClose
 } from "react-icons/fa";
 
 import ChatMenuButton from "../components/ChatMenuButton";
 import { useDispatch, useSelector } from "react-redux";
 import socket from "../sockets/socket.js";
-import { muteChat, unmuteChat } from "../actions/chatActions.js";
+import { blockUser, muteChat, unblockUser, unmuteChat } from "../actions/chatActions.js";
 import { toast } from "react-toastify";
 
 const ChatMenu = () => {
   const { selectedChat } = useSelector((state) => state.chat);
   const { user } = useSelector((state) => state.auth);
-  const [isChatOnMute, serIsChatOnMute] = useState(selectedChat.dndUsers.some((usr)=>usr === user._id))
+  const [isChatOnMute, serIsChatOnMute] = useState(false)
+  const [isUserBlocked, setIsUserBlocked] = useState(false)
   const [muteLoading, setMuteLoading] = useState(false)
+  const [blockLoading, setBlockLoading] = useState(false)
 
   useEffect(()=>{
     if(user)serIsChatOnMute(selectedChat.dndUsers.some((usr)=>usr === user._id))
 
   },[selectedChat.dndUsers, user._id])
+  
+  useEffect(()=>{
+    if(selectedChat){
+      setIsUserBlocked(user.blockedUsers.some((usr)=>usr === selectedChat.recipient))
+    }
+  },[user.blockedUsers, user._id, selectedChat.recipient])
+  
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -79,7 +89,23 @@ const ChatMenu = () => {
     }
   };
 
-  const handleBlockUser = () => {
+  const handleBlockUser = async () => {
+    try {
+      setBlockLoading(true)
+      
+      if(isUserBlocked){
+        await dispatch(unblockUser({userId: user._id, blockedUserId: selectedChat.recipient}))
+        
+      }else{
+        await dispatch(blockUser({userId: user._id, blockedUserId: selectedChat.recipient}))
+      }
+    } catch (error) {
+     toast.error('Action failed') 
+    }finally{
+      setBlockLoading(false)
+    }
+
+
     console.log("User blocked");
   };
 
@@ -143,8 +169,8 @@ const ChatMenu = () => {
         disabled={muteLoading}
       />
       <ChatMenuButton
-        label="Block User"
-        icon={<FaUserSlash />}
+        label={blockLoading ? "Loading...": `${isUserBlocked ? "Unblock User" : "Block User"}`}
+        icon={isUserBlocked ? <FaEye /> : <FaWindowClose />}
         style="bg-primary"
         onClick={handleBlockUser}
       />
