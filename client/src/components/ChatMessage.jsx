@@ -20,6 +20,7 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
 
   const statusIcons = {
     sent: <BsCheck2 className="text-lime-100 text-xl font-bold" />,
+    blocked : <BsCheck2 className="text-lime-100 text-xl font-bold" />,
     delivered: <BsCheck2All className="text-gray-800 text-xl" />,
     read: <BsCheck2All className="text-xl text-blue-400" />,
     sending: <ImSpinner9 className="text-gray-800 animate-spin text-xl" />,
