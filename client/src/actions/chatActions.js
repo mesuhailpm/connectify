@@ -75,3 +75,35 @@ export const unmuteChat = ({userId, chatId}) => async (dispatch) => {
     
   }
 }
+
+// block users this is implemented here as authRoutes is not suitable for this
+export const blockUser = ({userId, blockedUserId}) => async (dispatch) => {
+
+  try {
+    const body = {userId, blockedUserId}
+    console.log('inside blockUser')
+    const {data} = await API.post(`api/users/block/`, body)
+    dispatch ({type: 'BLOCK_USER', payload: blockedUserId})
+    console.log(data)
+    toast.success(data.message)
+    
+  } catch (error) {
+    toast.error('Action failed')
+    
+  }
+}
+
+
+export const unblockUser = ({userId, blockedUserId}) => async (dispatch) => {
+  try {
+    const body = {userId, blockedUserId}
+    console.log('inside unblockUser')
+    const {data} = await API.post(`api/users/unblock/`, body)
+    dispatch ({type: 'UNBLOCK_USER', payload: blockedUserId})
+    toast.success(data.message)
+    
+  } catch (error) {
+    toast.error('Action failed')
+    
+  }
+}
