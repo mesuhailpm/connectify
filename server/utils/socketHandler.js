@@ -26,13 +26,24 @@ const updateUserStatus = async ( type, socket, io,  users, userId ) => {
       // Add the user to their personal room
       socket.join(userId);
 
-      // Add the user to their contacts' rooms
-      const contacts = user.contacts || [];
-      contacts.forEach((contact) => {
-        socket.join(contact._id.toString());
+      // Allow unblocked contacts to join the user's room, blocked ones leave
+      user.contacts.forEach((contact) => {
+        if (!user.blockedUsers.some((el) => el.toString() === contact._id.toString())) {
+          io.sockets.sockets.forEach((s) => {
+            if (s.id === users[contact._id.toString()]) {
+              s.join(userId);
+            }
+          });
+        } else {
+          io.sockets.sockets.forEach((s) => {
+            if (s.id === users[contact._id.toString()]) {
+              s.leave(userId);
+            }
+          });
+        }
       });
 
-      // Notify contacts that the user is online
+      // Emit to the user's room so all allowed contacts get the online status
       io.to(userId).emit("user-online", userId);
 
       // Store the user's socket ID for tracking
@@ -150,12 +161,12 @@ const saveMessageToDatabase = async (io, users,{ chat, content, userId, _id, tar
         { session: mongooseSession }
       );
 
-      const notification = await Notification.create({
+      if (status !== 'blocked') {await Notification.create({
         sender: userId,
         recipient: target,
         content,
         chat,
-      });
+      });}
     
       const senderSocketId = users[userId];
       
