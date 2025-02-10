@@ -15,7 +15,8 @@ export const loadUserFromToken = () => async (dispatch) => {
 
       // Fetch the user's data (this can be from your /me or /profile endpoint)
       const { data: {user} } = await API.get('/api/auth/me');
-
+      //when the user details are not returned, the user is not authenticated
+      if(!user) throw new Error('Failed to authenticate')
       dispatch({
         type: AUTH_SUCCESS,
         payload: { user, token },
@@ -74,7 +75,7 @@ export const signUp = (userData) => async (dispatch) => {
 
     dispatch({
       type: AUTH_SUCCESS,
-      payload: { user: data.user, token: data.token },
+      payload: { user: data.data.user, token: data.token },
     });
 
     // Save token to localStorage if needed
