@@ -10,7 +10,7 @@ exports.getChats = async (req, res) => {
     const chats = await Chat.find({ participants: req.user._id.toString() })
       .populate({
         path: "participants",
-        select: "username avatar lastSeen isOnline",
+        select: "username avatar lastSeen isOnline blockedUsers",
       })
       .populate({
         path: "lastMessage",
@@ -23,11 +23,12 @@ exports.getChats = async (req, res) => {
       const otherParticipant = chat.participants.find(
         (participant) => !participant._id.equals(req.user._id)
       );
+      const isBlocked = otherParticipant.blockedUsers.includes(req.user._id.toString());
 
       // Check if lastMessage exists before accessing its properties
-      const lastMessage = chat.lastMessage || {};
+      const lastMessage = isBlocked ? {} : chat.lastMessage || {};
 
-      const isOutgoing = lastMessage.sender
+      const isOutgoing = lastMessage?.sender
         ? lastMessage.sender.equals(req.user._id)
         : false;
       const isRead = lastMessage.readBy
@@ -36,16 +37,20 @@ exports.getChats = async (req, res) => {
       const messageStatus = isRead ? "read" : isOutgoing ? "sent" : "received";
       // console.log("i will return ", {
       //   _id: chat._id,
-      //   recipient: otherParticipant._id,
       //   username: otherParticipant.username,
       //   avatar: otherParticipant.avatar,
+      //   recipient: otherParticipant._id,
       //   lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
       //   isOutgoing,
       //   isRead,
       //   messageStatus,
       //   updatedAt: chat.updatedAt,
+      //   isOnline: !isBlocked ? otherParticipant.isOnline : false,
+      //   lastSeen: !isBlocked ? otherParticipant.lastSeen : new Date()-360000000,
+      //   dndUsers: chat.dndUsers
       // });
       // console.log({otherParticipant})
+
       return {
         _id: chat._id,
         username: otherParticipant.username,
@@ -56,8 +61,8 @@ exports.getChats = async (req, res) => {
         isRead,
         messageStatus,
         updatedAt: chat.updatedAt,
-        isOnline: otherParticipant.isOnline,
-        lastSeen: otherParticipant.lastSeen,
+        isOnline: !isBlocked ? otherParticipant.isOnline : false,
+        lastSeen: !isBlocked ? otherParticipant.lastSeen : new Date()-360000000,
         dndUsers: chat.dndUsers
       };
     });
@@ -151,6 +156,7 @@ exports.createChat = async (req, res) => {
         updatedAt: chat.updatedAt,
         isOnline: otherParticipant.isOnline,
         lastSeen: otherParticipant.lastSeen,
+        dndUsers: chat.dndUsers
 
       };
     };
@@ -163,9 +169,9 @@ exports.createChat = async (req, res) => {
     );
 
     console.log('will add the other participant to the contact list of the current user', otherParticipant._id)
-    await User.findByIdAndUpdate(req.user._id, { $push: { contacts: otherParticipant._id } });
+    await User.findByIdAndUpdate(req.user._id, { $addToSet: { contacts: otherParticipant._id } });
     console.log('will add this user to the contact list of the other user', req.user._id)
-    await User.findByIdAndUpdate(otherParticipant._id, { $push: { contacts: req.user._id } });
+    await User.findByIdAndUpdate(otherParticipant._id, { $addToSet: { contacts: req.user._id } });
 
     res.status(200).json({ success: true, data: result });
   } catch (error) {
@@ -256,7 +262,8 @@ exports.getChatMessages = async (req, res) => {
       readBy: message.readBy,
       //get read status if readBy includes all item in target array
       isReadByTarget: message.readBy.length === message.target.length ? true : false
-    }));
+    })).filter(message => !(message.status === 'blocked' && !message.isOutgoing));
+
 
     // console.log("formatted messages: ", { formattedMessages });
 
