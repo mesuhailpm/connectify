@@ -59,10 +59,10 @@ function App() {
   useEffect(() => {
         const isOnChatsPage = location.pathname === "/chats" ? true : false
       
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
       dispatch(fetchUnreadMessageNotifications(user._id,isOnChatsPage))
     }
-  }, [isAuthenticated, dispatch, chats]);
+  }, [isAuthenticated, dispatch, chats, user]); //user is also needed
   
 
   useEffect(() => {
