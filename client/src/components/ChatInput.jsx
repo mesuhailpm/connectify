@@ -152,6 +152,7 @@ function ChatInput() {
             readBy,
             sender,
             _id,
+            status
           } = message;
 
           const messageForState = () => {
@@ -163,7 +164,7 @@ function ChatInput() {
                 updatedAt,
                 readBy,
                 sender,
-                status: "sent",
+                status,
                 _id,
                 isOutgoing: true,
               };

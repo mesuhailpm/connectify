@@ -121,12 +121,21 @@ const updateMessageReadStatus = async ( io, users, { messageId, chatId, readerId
 
 const saveMessageToDatabase = async (io, users,{ chat, content, userId, _id, target }) => {
 
+  const chatInDb = await Chat.findById(chat).populate('participants');
+  const receiver = chatInDb.participants.find(participant => !participant._id.equals(userId));
+
+  let status = 'sent';
+  if (receiver.blockedUsers.includes(userId)) {
+    status = 'blocked';
+    console.log('Message blocked: User is blocked');
+  }
+
   const newMessage = new Message({
     _id,
     chat,
     sender: userId,
     content,
-    status: "sent",
+    status,
     target,
   });
   try {
@@ -155,7 +164,7 @@ const saveMessageToDatabase = async (io, users,{ chat, content, userId, _id, tar
       }
       // io.emit("sendMessageSuccess", newMessage);
       const recipientSocketId = users[target];
-      if (recipientSocketId) {
+      if (recipientSocketId && status !== 'blocked') {
         io.to(recipientSocketId).emit("receiveMessage", newMessage);
       }
       await mongooseSession.commitTransaction();
