@@ -183,29 +183,42 @@ exports.createChat = async (req, res) => {
 };
 
 // Send a message in a specific chat
-exports.sendMessage = async (req, res) => {
-  try {
-    const { content } = req.body;
-    const { chat } = req.params;
+// exports.sendMessage = async (req, res) => {
+//   try {
+//     const { content } = req.body;
+//     const { chat } = req.params;
 
-    // Create and save message
-    const message = await Message.create({
-      chat,
-      sender: req.user._id,
-      content,
-    });
+//     // Check if the sender is blocked by the receiver
+//     const chatInDb = await Chat.findById(chat).populate('participants');
+//     const receiver = chat.participants.find(participant => !participant._id.equals(req.user._id));
 
-    // Update chat with the last message
-    await Chat.findByIdAndUpdate(chat, { lastMessage: message._id });
+//     let status = 'sent';
+//     if (receiver.blockedUsers.includes(req.user._id)) {
+//       status = 'blocked';
+//       console.log('Message blocked: User is blocked');
+//     }
 
-    res.status(201).json({ success: true, data: message });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ success: false, message: "Error sending message", error });
-  }
-};
+//     // Create and save message
+//     const message = await Message.create({
+//       chat,
+//       sender: req.user._id,
+//       content,
+//       status
+//     });
+
+//     // Update chat with the last message if the message is not blocked
+//     if (status === 'sent') {
+//       await Chat.findByIdAndUpdate(chat, { lastMessage: message._id });
+//     }
+
+//     res.status(201).json({ success: true, data: message });
+//   } catch (error) {
+//     console.error(error);
+//     res
+//       .status(500)
+//       .json({ success: false, message: "Error sending message", error });
+//   }
+// };
 
 // Get all messages from a specific chat
 exports.getChatMessages = async (req, res) => {
