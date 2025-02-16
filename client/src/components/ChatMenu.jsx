@@ -31,13 +31,13 @@ const ChatMenu = () => {
   useEffect(()=>{
     if(user)serIsChatOnMute(selectedChat.dndUsers.some((usr)=>usr === user._id))
 
-  },[selectedChat.dndUsers, user._id])
+  },[selectedChat, user])
   
   useEffect(()=>{
     if(selectedChat){
       setIsUserBlocked(user.blockedUsers.some((usr)=>usr === selectedChat.recipient))
     }
-  },[user.blockedUsers, user._id, selectedChat.recipient])
+  },[ user, selectedChat])
   
   const dispatch = useDispatch();
 
