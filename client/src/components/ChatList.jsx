@@ -51,11 +51,12 @@ const ChatList = () => {
         <ChatCard
           key={chat._id}
           id={chat._id}
+          messageStatus={chat?.lastMessageStatus}
           avatar={chat.avatar}
           username={chat.username}
           isOutgoing={chat.isOutgoing}
           lastMessage={chat.lastMessage.substring(0, 20)}
-          isRead={false}
+          isRead={ (!chat.isOutgoing && chat.lastMessageStatus === 'read') ? true : chat.isOutgoing ? true : false }
           onClick={() => onClick(chat)}
           messageStatus={chat.messageStatus}
         />

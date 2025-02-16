@@ -2,6 +2,57 @@ const Chat = require("../models/Chat");
 const Message = require("../models/Message");
 const User = require("../models/User");
 
+
+const formatChat = (chat, userId) => {
+  const otherParticipant = chat.participants.find(
+    (participant) => !participant._id.equals(userId)
+  );
+  const isBlocked = otherParticipant.blockedUsers.includes(userId);
+
+  // Check if lastMessage exists before accessing its properties
+  const lastMessage = isBlocked ? {} : chat.lastMessage || {};
+
+  const isOutgoing = lastMessage?.sender
+    ? lastMessage.sender.equals(userId)
+    : false;
+
+    const getLastMessage = () => {
+      if (!chat.lastMessage || isBlocked) return '';
+      return chat.lastMessage.status === 'blocked' ? '' : chat.lastMessage.content;
+    };
+
+  const getLastMessageStatus = () => {
+    if (!chat.lastMessage || isBlocked) return 'read';
+    return chat.lastMessage.status === 'blocked' ? 'read' : chat.lastMessage.status;
+  } // If the message isn't blocked, use its actual status; 
+  // otherwise default to 'read' because pending statuses don't apply when blocked.
+  
+
+  console.log(getLastMessageStatus(), 'last message from formatChat')
+
+  const getRandomLastSeen = () => {
+    const now = new Date();
+    const randomOffset = Math.floor(Math.random() * 604800000); // Up to 7 days ago
+    return new Date(now - randomOffset);
+  };
+
+    return {
+    _id: chat._id,
+    username: otherParticipant.username,
+    avatar: otherParticipant.avatar,
+    recipient: otherParticipant._id,
+    lastMessage: getLastMessage(),
+    lastMessageStatus: getLastMessageStatus(),
+    isOutgoing,
+    updatedAt: chat.updatedAt,
+    isOnline: !isBlocked && otherParticipant.isOnline,
+    lastSeen: !isBlocked ? otherParticipant.lastSeen : getRandomLastSeen(),
+    dndUsers: chat.dndUsers
+  };
+}
+
+
+
 // Get all chat threads for the logged-in user
 exports.getChats = async (req, res) => {
   // console.log("will fetch chats");
@@ -17,57 +68,12 @@ exports.getChats = async (req, res) => {
         select: "content sender status readBy",
       })
       .exec();
-    // console.log(chats, "chats");
 
-    const formattedChats = chats.map((chat) => {
-      const otherParticipant = chat.participants.find(
-        (participant) => !participant._id.equals(req.user._id)
-      );
-      const isBlocked = otherParticipant.blockedUsers.includes(req.user._id.toString());
+    const formattedChats = () => {
+      return chats.map((chat)=>formatChat(chat, req.user._id)) 
+    }
 
-      // Check if lastMessage exists before accessing its properties
-      const lastMessage = isBlocked ? {} : chat.lastMessage || {};
-
-      const isOutgoing = lastMessage?.sender
-        ? lastMessage.sender.equals(req.user._id)
-        : false;
-      const isRead = lastMessage.readBy
-        ? lastMessage.readBy.includes(req.user._id)
-        : false;
-      const messageStatus = isRead ? "read" : isOutgoing ? "sent" : "received";
-      // console.log("i will return ", {
-      //   _id: chat._id,
-      //   username: otherParticipant.username,
-      //   avatar: otherParticipant.avatar,
-      //   recipient: otherParticipant._id,
-      //   lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
-      //   isOutgoing,
-      //   isRead,
-      //   messageStatus,
-      //   updatedAt: chat.updatedAt,
-      //   isOnline: !isBlocked ? otherParticipant.isOnline : false,
-      //   lastSeen: !isBlocked ? otherParticipant.lastSeen : new Date()-360000000,
-      //   dndUsers: chat.dndUsers
-      // });
-      // console.log({otherParticipant})
-
-      return {
-        _id: chat._id,
-        username: otherParticipant.username,
-        avatar: otherParticipant.avatar,
-        recipient: otherParticipant._id,
-        lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
-        isOutgoing,
-        isRead,
-        messageStatus,
-        updatedAt: chat.updatedAt,
-        isOnline: !isBlocked ? otherParticipant.isOnline : false,
-        lastSeen: !isBlocked ? otherParticipant.lastSeen : new Date()-360000000,
-        dndUsers: chat.dndUsers
-      };
-    });
-
-    res.status(200).json({ success: true, data: formattedChats });
+    res.status(200).json({ success: true, data: formattedChats() });
   } catch (error) {
     console.log("error inside getChats", error);
     res
@@ -90,7 +96,7 @@ exports.createChat = async (req, res) => {
     })
       .populate({
         path: "participants",
-        select: "username avatar lastSeen isOnline",
+        select: "username avatar lastSeen isOnline blockedUsers",
       })
       .populate({
         path: "lastMessage",
@@ -118,49 +124,7 @@ exports.createChat = async (req, res) => {
 
     }
 
-    const formattedChat = (chat) => {
-      const otherParticipant = chat.participants.find(
-        (participant) => !participant._id.equals(req.user._id)
-      );
-
-      // Check if lastMessage exists before accessing its properties
-      const lastMessage = chat.lastMessage || {};
-
-      const isOutgoing = lastMessage.sender
-        ? lastMessage.sender.equals(req.user._id)
-        : false;
-      const isRead = lastMessage.readBy
-        ? lastMessage.readBy.includes(req.user._id)
-        : false;
-      const messageStatus = isRead ? "read" : isOutgoing ? "sent" : "received";
-
-      // console.log("i will return ", {
-      //   _id: chat._id,
-      //   username: otherParticipant.username,
-      //   avatar: otherParticipant.avatar,
-      //   lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
-      //   isOutgoing,
-      //   isRead,
-      //   messageStatus,
-      //   updatedAt: chat.updatedAt,
-      // });
-
-      return {
-        _id: chat._id,
-        username: otherParticipant.username,
-        avatar: otherParticipant.avatar,
-        lastMessage: chat.lastMessage ? chat.lastMessage.content : "",
-        isOutgoing,
-        isRead,
-        messageStatus,
-        updatedAt: chat.updatedAt,
-        isOnline: otherParticipant.isOnline,
-        lastSeen: otherParticipant.lastSeen,
-        dndUsers: chat.dndUsers
-
-      };
-    };
-    const result = formattedChat(chat)
+    const result = formatChat(chat, req.user._id);
     console.log(result, " these formated chat will be returned");
 
     //add the other user to the contact list of the current user
@@ -222,14 +186,10 @@ exports.createChat = async (req, res) => {
 
 // Get all messages from a specific chat
 exports.getChatMessages = async (req, res) => {
-  console.log("inside chatController.getChatMessages()");
-  console.log(
-    req.params,
-    " request parameter inside chatController.getChatMessages()"
-  );
+  
   const { chatId } = req.params; // Get chatId from URL parameters
   const userId = req.user._id.toString(); // Get the ID of the logged-in user
-  // console.log(req.user);
+  
   try {
     // Check if the chat exists and if the user is a participant
     const chat = await Chat.findById(chatId).populate("participants");
@@ -242,7 +202,7 @@ exports.getChatMessages = async (req, res) => {
     }
 
     // Check if the user is a participant in the chat
-    // console.log(userId, " userId inside getChatMessages");
+    
     if (
       !chat.participants.some(
         (participant) => participant._id.toString() === userId
