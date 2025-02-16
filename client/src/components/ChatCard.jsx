@@ -1,4 +1,5 @@
 import React from "react";
+import { BsCheck2, BsCheck2All } from "react-icons/bs";
 import { useSelector } from "react-redux";
 
 function ChatCard({
@@ -7,16 +8,16 @@ function ChatCard({
   avatar,
   lastMessage,
   isRead = true,
-  messageStatus = "sent",
+  messageStatus = "read",
   isOutgoing = "true",
   onClick,
 }) {
   const { selectedChat } = useSelector((state) => state.chat);
   // Icons for message status (you can use icons, emojis, or SVGs)
   const statusIcons = {
-    sent: "🕒", // Example icon for sent (e.g., clock)
-    delivered: "✔️", // Example icon for delivered (e.g., single checkmark)
-    read: "✔️✔️", // Example icon for read (e.g., double checkmarks)
+    sent: <BsCheck2 className="text-lime-100 text-xl font-bold" />,
+    delivered: <BsCheck2All className="text-gray-800 text-xl" />,
+    read: <BsCheck2All className="text-xl text-blue-400" />
   };
 
   return (
@@ -42,7 +43,7 @@ function ChatCard({
           <h2 className="text-lg font-semibold text-white">{username}</h2>
           {/* If the message is unread, show a dot indicator */}
           {!isRead && (
-            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+            <span className="w-3 h-3  bg-blue-500 rounded-full"></span>
           )}
         </div>
 
