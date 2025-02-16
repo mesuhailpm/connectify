@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { BsCheck2All, BsCheck2 } from "react-icons/bs";
 import { MdSmsFailed as BsStopBtn } from "react-icons/md";
 import { ImSpinner9 } from "react-icons/im";
@@ -18,6 +18,7 @@ function ChatMessage({_id, content, isOutgoing, messageStatus, updatedAt, isRead
 const { user } = useSelector((state) => state.auth);
 
   const statusIcons = {
+    blocked: <BsCheck2 className="text-lime-100 text-xl font-bold" />,
     sent: <BsCheck2 className="text-lime-100 text-xl font-bold" />,
     delivered: <BsCheck2All className="text-gray-800 text-xl" />,
     read: <BsCheck2All className="text-xl text-blue-400" />,
@@ -180,7 +181,7 @@ const { user } = useSelector((state) => state.auth);
     >
       <div
         className={`flex w-fit justify-between p-2 rounded-lg ${
-          isOutgoing ? "bg-teal-900 place-self-end" : "bg-cyan-800"
+          isOutgoing ? "bg-teal-900 place-self-end ml-[1rem]" : "bg-cyan-800 mr-[1rem]"
         } text-white`}
       >
         <div className="left flex flex-col">
