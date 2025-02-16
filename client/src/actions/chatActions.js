@@ -2,17 +2,13 @@
 import { toast } from "react-toastify";
 import API from "../api";
 import {
-  FETCH_CHATS_FAILURE,
   FETCH_MESSAGES_REQUEST,
-  SELECT_CHAT,
   FETCH_CHAT_MESSAGES_FAILURE,
   FETCH_CHAT_MESSAGES_SUCCESS,
-  FETCH_MORE_CHAT_MESSAGES_SUCCESS,
-  SEARCH_USERS_SUCCESS,
-  SEARCH_USERS_REQUEST,
-  SEARCH_USERS_FAILURE,
   MUTE_CHAT,
-  UNMUTE_CHAT
+  UNMUTE_CHAT,
+  BLOCK_USER,
+  UNBLOCK_USER
 } from "../constants/actionTypes.js";
 
 
@@ -31,12 +27,7 @@ export const fetchChatMessages = (chatId) => async (dispatch) => {
         type: FETCH_CHAT_MESSAGES_SUCCESS,
         payload: messages,
       });
-    } else {
-      dispatch({
-        type: FETCH_MORE_CHAT_MESSAGES_SUCCESS,
-        payload: messages,
-      });
-    }
+    
   } catch (error) {
     console.error("Failed to fetch chat messages:", error);
     dispatch({ type: FETCH_CHAT_MESSAGES_FAILURE, payload: error.message });
@@ -76,9 +67,8 @@ export const blockUser = ({userId, blockedUserId}) => async (dispatch) => {
 
   try {
     const body = {userId, blockedUserId}
-    console.log('inside blockUser')
     const {data} = await API.post(`api/users/block/`, body)
-    dispatch ({type: 'BLOCK_USER', payload: blockedUserId})
+    dispatch ({type: BLOCK_USER, payload: blockedUserId})
     console.log(data)
     toast.success(data.message)
     
@@ -94,7 +84,7 @@ export const unblockUser = ({userId, blockedUserId}) => async (dispatch) => {
     const body = {userId, blockedUserId}
     
     const {data} = await API.post(`api/users/unblock/`, body)
-    dispatch ({type: 'UNBLOCK_USER', payload: blockedUserId})
+    dispatch ({type:  UNBLOCK_USER, payload: blockedUserId})
     toast.success(data.message)
     
   } catch (error) {
