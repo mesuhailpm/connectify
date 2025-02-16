@@ -52,6 +52,10 @@ const Chats = () => {
   //     />
   //   );
   if (authState.loading) return <>Loading...</>;
+  if (authState.error) return <div className="w-full h-full bg-red-100 flex flex-col justify-center items-center">
+  <h1 className="text-red-700 font-bold text-2xl">{authState.error}</h1>
+  <h2 className="text-red-700 text-2xl">{'Try again'}</h2>;
+  </div>
   return (
     <>
       <ChatList />

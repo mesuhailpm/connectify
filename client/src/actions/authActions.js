@@ -22,9 +22,11 @@ export const loadUserFromToken = () => async (dispatch) => {
         payload: { user, token },
       });
     } catch (error) {
+      console.log(error)
+      const errorMessage = error.message === "Network Error" ? error.message : error.response?.data?.message || 'Failed to authenticate';
       dispatch({
         type: AUTH_FAILURE,
-        payload: { error: 'Failed to authenticate' },
+        payload: { error: errorMessage },
       });
       // Optionally, clear token if failed
       localStorage.removeItem('token');
