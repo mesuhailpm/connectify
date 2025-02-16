@@ -11,12 +11,11 @@ import socket from "../sockets/socket";
 function ChatMessage({_id, content, isOutgoing, messageStatus, updatedAt, isReadByTarget }) {
   // console.log({_id, content, isOutgoing, messageStatus, updatedAt,isReadByTarget,0:0 })
 
-  const [isSending, setIsSending] = useState(false)
   const dispatch = useDispatch();
 
-  const { chats, error, loading, messages, selectedChat, sendingMessage } =
+  const { selectedChat } =
   useSelector((state) => state.chat);
-const { user, isAuthenticated, token } = useSelector((state) => state.auth);
+const { user } = useSelector((state) => state.auth);
 
   const statusIcons = {
     sent: <BsCheck2 className="text-lime-100 text-xl font-bold" />,
@@ -31,9 +30,6 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
     //   return;
     // }
 
-
-    setIsSending(true);
-
     try {
       const newMessagaeObj = {
         _id,
@@ -45,7 +41,6 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
         updatedAt,
         readBy: [],
         sender: user._id.toString(),
-        status: "sending",
         target: selectedChat.recipient
       };
 
@@ -169,7 +164,6 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
         payload: { message: _id, error: error },
       });
     } finally {
-      setIsSending(false);
     }
   };
   const formattedTime = new Date(updatedAt).toLocaleTimeString([], {

@@ -18,17 +18,15 @@ import {
 
 // Fetch chat messages for the selected user
 export const fetchChatMessages = (chatId) => async (dispatch) => {
-  console.log("inside fetchchatMessages");
+  
   try {
     dispatch({
       type: FETCH_MESSAGES_REQUEST,
     });
     const response = await API.get(`/api/chats/${chatId}/messages`);
-    // const response = await API.get(`/api/chats/${userId}/messages`);
-    console.log(response);
+    
+    
     const messages = response.data.formattedMessages || response.data;
-    console.log(messages);
-    if (messages.length) {
       dispatch({
         type: FETCH_CHAT_MESSAGES_SUCCESS,
         payload: messages,
@@ -47,8 +45,6 @@ export const fetchChatMessages = (chatId) => async (dispatch) => {
 
 export const muteChat = ({userId, chatId}) => async (dispatch) => {
   try {
-    console.log('inside muteChat')
-
     const {data} = await API.put(`api/chats/muteChat/${userId}/${chatId}`)
     dispatch ({type: MUTE_CHAT, payload: {userId, chatId}})
     toast.success(data.message)
@@ -63,7 +59,6 @@ export const muteChat = ({userId, chatId}) => async (dispatch) => {
 
 export const unmuteChat = ({userId, chatId}) => async (dispatch) => {
   try {
-    console.log('inside unmuteChat')
     const {data} = await API.put(`api/chats/unmuteChat/${userId}/${chatId}`)
     dispatch ({type: UNMUTE_CHAT, payload: {userId, chatId}})
 
@@ -97,7 +92,7 @@ export const blockUser = ({userId, blockedUserId}) => async (dispatch) => {
 export const unblockUser = ({userId, blockedUserId}) => async (dispatch) => {
   try {
     const body = {userId, blockedUserId}
-    console.log('inside unblockUser')
+    
     const {data} = await API.post(`api/users/unblock/`, body)
     dispatch ({type: 'UNBLOCK_USER', payload: blockedUserId})
     toast.success(data.message)

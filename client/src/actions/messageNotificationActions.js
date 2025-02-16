@@ -15,7 +15,7 @@ export const fetchUnreadMessageNotifications = (userId, isOnChatsPage) => async 
     }
 }
 export const markNotificationAsReadInDb = async ({userId, notificationId}) => {
-    try { console.log(userId,notificationId)
+    try { 
       const {data} = await API.put(
         "/api/messageNotifications/markOneAsRead/"+userId+"/"+notificationId
       );
@@ -30,7 +30,7 @@ export const markNotificationAsReadInDb = async ({userId, notificationId}) => {
       const {data} = await API.put(
         "/api/messageNotifications/markOneAsReadByChatId/"+userId+"/"+chatId
       );
-      console.log(data)
+      
     } catch (error) {
       console.log('error inside markNotificationForMessageAsReadInDb ',error)
       throw error;    

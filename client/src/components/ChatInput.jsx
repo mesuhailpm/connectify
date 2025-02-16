@@ -76,8 +76,8 @@ function ChatInput() {
       };
 
       // Emit the new message to the server
-      console.log(mongoose.Types.ObjectId.isValid(randomId), ' from valid'); // Check if the ID is valid
-      console.log(randomId)
+      
+      
       console.log("will emit", {
         _id: randomId,
         chat: selectedChat._id,

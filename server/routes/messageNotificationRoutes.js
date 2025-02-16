@@ -30,7 +30,7 @@ router.get('/:userId', async (req, res) => {
 
 // PUT /api/messageNotifications/:userId/markOneAsRead/:notificationId
 router.put('/markOneAsRead/:userId/:notificationId', async (req, res) => {
-    try { console.log('first')
+    try { 
         const { userId, notificationId } = req.params;
         await Notification.updateOne({ recipient: userId, _id: notificationId }, { isRead: true });
         res.status(200).json({ message: 'Notification marked as read' });
