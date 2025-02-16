@@ -87,6 +87,10 @@ function ChatInput() {
         readBy:[],
         target: selectedChat.recipient
       });
+      if(!socket || socket.disconnected){
+        toast.warn('The server is not connected, try refreshing')
+        return;
+      }
       await socket.emit("sendMessage", {
         _id: randomId,
         chat: selectedChat._id,
