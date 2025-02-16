@@ -26,23 +26,10 @@ const SignedInIndicator = () => {
     }
   }, [unreadMessageNotifications]);
 
-  const handleMarkAllAsRead = async () => {
-    try {
-     dispatch(markAllNotificationsAsReadInDb(user._id));
-  } catch (error) {
-    toast.error('Failed to mark all as read', {autoClose: 2000})
-  }}
-  
+  const handleMarkAllAsRead = () => { dispatch(markAllNotificationsAsReadInDb(user._id))}  
   const handleMarkAsRead = async (e, notificationId) => {
     e.stopPropagation()
-    try {
-      await markNotificationAsReadInDb({userId: user._id, notificationId: notificationId});
-      dispatch({type: MARK_ONE_MESSAGE_NOTIFICATION_AS_READ, payload: notificationId})
-      
-    } catch (error) {
-      toast.error('Failed to mark as read', {autoClose: 2000})
-    }
-    
+      await dispatch(markNotificationAsReadInDb({userId: user._id, notificationId: notificationId}));          
   }
 
   const handleSelectChat = async (chat,notificationId) => {
