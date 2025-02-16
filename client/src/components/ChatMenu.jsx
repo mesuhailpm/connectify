@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import socket from "../sockets/socket.js";
 import { blockUser, muteChat, unblockUser, unmuteChat } from "../actions/chatActions.js";
 import { toast } from "react-toastify";
+import { UPDATE_CHAT_PARTNER } from "../constants/actionTypes.js";
 
 const ChatMenu = () => {
   const { selectedChat } = useSelector((state) => state.chat);
@@ -45,7 +46,7 @@ const ChatMenu = () => {
     const handleOnline = async (userId) => {
       if (userId === selectedChat.recipient) {
         dispatch({
-          type: "UPDATE_CHAT_PARTNER",
+          type: UPDATE_CHAT_PARTNER,
           payload: { isOnline: true },
         });
       }
@@ -54,7 +55,7 @@ const ChatMenu = () => {
     const handleOffline = async (userId) => {
       if (userId === selectedChat.recipient) {
         dispatch({
-          type: "UPDATE_CHAT_PARTNER",
+          type: UPDATE_CHAT_PARTNER,
           payload: { isOnline: false, lastSeen: new Date().toLocaleString() },
         });
       }
