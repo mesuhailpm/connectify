@@ -200,6 +200,11 @@ const chatReducer = (state = initialState, action) => {
         ...state,
         sendingMessage: false,
         messages: [...state.messages.map((msg)=>msg._id === action.payload._id ? {...msg, status: 'sent'}: msg)], // Add the new message to the chat
+        chats: state.chats.map((chat) =>
+          chat._id === action.payload.chat
+            ? { ...chat, lastMessage: action.payload.content, lastMessageStatus: 'sent' }
+            : chat
+        ),
       };
 
     case RECEIVE_MESSAGE:
@@ -248,7 +253,7 @@ const chatReducer = (state = initialState, action) => {
         // Update the last message of the chat
         chats: state.chats?.map((chat) =>
           chat._id === action.payload.chat
-            ? { ...chat, lastMessage: action.payload.content }
+            ? { ...chat, lastMessage: action.payload.content, lastMessageStatus: '' , isOutgoing: false}
             : chat
         ),
 
@@ -272,13 +277,23 @@ const chatReducer = (state = initialState, action) => {
       return {
         ...state,
         messages: state.messages.map((msg) => msg._id === action.payload.messageId ? {...msg, readBy: [...msg.readBy, action.payload.readerId],isReadByTarget: true} : msg),
+        chats: state.chats.map((chat) =>
+          chat._id === state.selectedChat._id
+            ? { ...chat, lastMessageStatus: 'read' }
+            : chat
+        ),
       }
 
     case MESSAGE_READ_BY_SELF :
     return {  
       ...state,
         messages: state.messages.map((msg) => msg._id === action.payload.messageId ? {...msg, readBy: [...msg.readBy, action.payload.readerId]} : msg), 
-        unreadMessageNotifications: state.unreadMessageNotifications.map((notif) => notif.chat === action.payload.chatId ? {...notif, isRead: true}:{...notif})
+        unreadMessageNotifications: state.unreadMessageNotifications.map((notif) => notif.chat === action.payload.chatId ? {...notif, isRead: true}:{...notif}),
+        chats: state.chats.map((chat) =>
+          chat._id === action.payload.chatId
+            ? { ...chat, lastMessageStatus: 'read' }
+            : chat
+        ),
       };
     case UPDATE_MESSAGE_STATUS: // For updating read, delivered, sent status
       return {
