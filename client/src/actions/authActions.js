@@ -23,20 +23,25 @@ export const loadUserFromToken = () => async (dispatch) => {
       });
     } catch (error) {
       console.log(error)
-      const errorMessage = error.message === "Network Error" ? error.message : error.response?.data?.message || 'Failed to authenticate';
+      const errorMessage = (error.message === "Network Error" || error.message === 'Session expired') ? error.message : error.response?.data?.message || 'Failed to authenticate';
       dispatch({
         type: AUTH_FAILURE,
         payload: { error: errorMessage },
       });
-      // Optionally, clear token if failed
-      localStorage.removeItem('token');
-      localStorage.removeItem('userId');
+
+      // Optionally, clear token if expired
+      if (error.message === 'Session expired') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+      }
     }
   } else {
     dispatch({
       type: AUTH_FAILURE,
       payload: { error: "Failed to authenticate" },
     });
+    // Optionally, clear userId if failed
+    localStorage.removeItem('userId');
   }
 };
 
