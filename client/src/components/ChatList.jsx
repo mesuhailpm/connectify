@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import ChatCard from "./ChatCard";
 import { useDispatch, useSelector } from "react-redux";
 import { SELECT_CHAT } from "../constants/actionTypes";
@@ -7,7 +7,7 @@ import SearchChats from "./SearchChats";
 const ChatList = () => {
 
 
-  const { messages, selectedChat, sendingMessage } = useSelector(
+  const {  selectedChat } = useSelector(
     (state) => state.chat
   );
 
@@ -15,7 +15,7 @@ const ChatList = () => {
   const chatState = useSelector((state) => state.chat);
 
 
-  const { chats, error, loading } = chatState;
+  const { chats, loading } = chatState;
   console.log(chats);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const ChatList = () => {
       console.log("this useEffect is selecting ", latest);
       dispatch({ type: SELECT_CHAT, payload: latest });
     }
-  }, [loading]);
+  }, [loading, chats, dispatch, selectedChat]);
 
   const onClick = (chat) => {
     //dispatch SELECT_Chat action with a check if chat is not selected already
@@ -51,13 +51,13 @@ const ChatList = () => {
         <ChatCard
           key={chat._id}
           id={chat._id}
+          messageStatus={chat?.lastMessageStatus}
           avatar={chat.avatar}
           username={chat.username}
           isOutgoing={chat.isOutgoing}
           lastMessage={chat.lastMessage.substring(0, 20)}
-          isRead={false}
+          isRead={ (!chat.isOutgoing && chat.lastMessageStatus === 'read') ? true : chat.isOutgoing ? true : false }
           onClick={() => onClick(chat)}
-          messageStatus={chat.messageStatus}
         />
       ))}
     </div>

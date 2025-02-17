@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const MmessageNotificationSchema = new mongoose.Schema({
+const MessageNotificationSchema = new mongoose.Schema({
     sender: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -31,6 +31,6 @@ const MmessageNotificationSchema = new mongoose.Schema({
     },
 });
 
-const MmessageNotification = mongoose.model('MmessageNotification', MmessageNotificationSchema);
+const MessageNotification = mongoose.model('MmessageNotification', MessageNotificationSchema);
 
-module.exports = MmessageNotification;
+module.exports = MessageNotification;
