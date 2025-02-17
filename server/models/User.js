@@ -12,6 +12,7 @@ const userSchema = new Schema({
   contacts: [
     { type: Schema.Types.ObjectId, ref: 'User', default: [], required: true }
   ],
+  blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [], required: true }],
   isOnline: {
     type: Boolean,
     required: true,
@@ -62,7 +63,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 userSchema.pre("save", function (next) {
   if (!this.avatar) {
     const encodedName = encodeURIComponent(this.username);
-    this.avatar = `https://ui-avatars.com/api/?name=${encodedName}`;
+    this.avatar = `https://ui-avatars.com/api/?name=${encodedName}&background=random`;
   }
   next();
 });

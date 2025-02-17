@@ -32,7 +32,7 @@ router.put('/unmuteChat/:userId/:chatId', authMiddleware.protect, chatController
 router.post('/new', authMiddleware.protect, chatController.createChat);
 
 // POST: /api/chats/:chatId/message - Send a message in a chat thread
-router.post('/:chatId/message', authMiddleware.protect, chatController.sendMessage);
+// router.post('/:chatId/message', authMiddleware.protect, chatController.sendMessage);
 
 // GET: /api/chats/:chatId/messages - Get all messages from a specific chat thread
 router.get('/:chatId/messages', authMiddleware.protect, chatController.getChatMessages);

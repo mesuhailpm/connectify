@@ -23,7 +23,7 @@ const ChatPanel = () => {
   //useEffect to mark messages as read/seen
 
   useEffect(() => {
-    if (!socket || !selectedChat?._id || !messages) return; // Guard clause for missing dependencies
+    if (!socket || !selectedChat?._id || !messages || !user) return; // Guard clause for missing dependencies
     const alreadySeen = messages
     .filter((message)=> !message.isOutgoing)
     .filter((message)=> message.readBy.some( readerId => readerId === user._id ))

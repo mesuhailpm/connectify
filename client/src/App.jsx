@@ -31,7 +31,6 @@ function App() {
   const { chats, mutedChats } = useSelector((state) => state.chat);
   const { isAuthenticated, loading, user } = useSelector((state) => state.auth);
   const [userInteracted, setUserInteracted] = useState(false);
-  const { error: chatError } = useSelector((state) => state.chat);
   const { error: authError } = useSelector((state) => state.auth);
 
   useEffect(() => {
@@ -59,10 +58,10 @@ function App() {
   useEffect(() => {
         const isOnChatsPage = location.pathname === "/chats" ? true : false
       
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
       dispatch(fetchUnreadMessageNotifications(user._id,isOnChatsPage))
     }
-  }, [isAuthenticated, dispatch, chats]);
+  }, [isAuthenticated, dispatch, chats, user]); //user is also needed
   
 
   useEffect(() => {
@@ -142,12 +141,6 @@ function App() {
         draggable
         pauseOnHover
         />
-      {chatError ||
-        (authError && (
-          <div className="fixed font-bold text-center text-2xl bg-yellow-500 p-2">
-            {chatError + authError}
-          </div>
-        ))}
       <Nav />
       <header className="bg-primary  p-4 h-[80px]" >
         <SignedInIndicator />
@@ -160,7 +153,7 @@ function App() {
           <Route
             path="/chats"
             element={
-              !isAuthenticated && !loading ? (
+              (!isAuthenticated && !loading && (authError !== 'Network Error')) ? (
                 <Navigate to={"/login"} replace />
               ) : (
                 <Chats />

@@ -1,4 +1,4 @@
-import { AUTH_REQUEST, AUTH_SUCCESS, AUTH_FAILURE, LOGOUT } from '../constants/actionTypes';
+import { AUTH_REQUEST, AUTH_SUCCESS, AUTH_FAILURE, LOGOUT, BLOCK_USER, UNBLOCK_USER } from '../constants/actionTypes';
 
 const initialState = {
     user: null,        // Stores the logged-in user's details
@@ -11,6 +11,18 @@ const initialState = {
   const authReducer = (state = initialState, action) => {
     if (!action.type.startsWith("@@")) {console.log(action)}
     switch (action.type) {
+
+      case BLOCK_USER:
+        return {
+          ...state,
+          user: {...state.user, blockedUsers: [...state.user.blockedUsers, action.payload]}
+        };
+
+      case UNBLOCK_USER:
+        return {
+          ...state,
+          user: {...state.user, blockedUsers: state.user.blockedUsers.filter(user => user !== action.payload)}
+        };
       case AUTH_REQUEST:
         return {
           ...state,

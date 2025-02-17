@@ -4,8 +4,7 @@ import { toast } from "react-toastify";
 const API = axios.create({
   baseURL: process.env.REACT_APP_BACKEND_URL || "http://localhost:5000", // Default to localhost if env is missing
 });
-// const token = localStorage.getItem("token");
-// API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
 
 API.interceptors.request.use(
   (config)=>{

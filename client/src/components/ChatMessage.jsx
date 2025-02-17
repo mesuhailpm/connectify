@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { BsCheck2All, BsCheck2 } from "react-icons/bs";
 import { MdSmsFailed as BsStopBtn } from "react-icons/md";
 import { ImSpinner9 } from "react-icons/im";
@@ -11,14 +11,14 @@ import socket from "../sockets/socket";
 function ChatMessage({_id, content, isOutgoing, messageStatus, updatedAt, isReadByTarget }) {
   // console.log({_id, content, isOutgoing, messageStatus, updatedAt,isReadByTarget,0:0 })
 
-  const [isSending, setIsSending] = useState(false)
   const dispatch = useDispatch();
 
-  const { chats, error, loading, messages, selectedChat, sendingMessage } =
+  const { selectedChat } =
   useSelector((state) => state.chat);
-const { user, isAuthenticated, token } = useSelector((state) => state.auth);
+const { user } = useSelector((state) => state.auth);
 
   const statusIcons = {
+    blocked: <BsCheck2 className="text-lime-100 text-xl font-bold" />,
     sent: <BsCheck2 className="text-lime-100 text-xl font-bold" />,
     delivered: <BsCheck2All className="text-gray-800 text-xl" />,
     read: <BsCheck2All className="text-xl text-blue-400" />,
@@ -31,9 +31,6 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
     //   return;
     // }
 
-
-    setIsSending(true);
-
     try {
       const newMessagaeObj = {
         _id,
@@ -45,7 +42,6 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
         updatedAt,
         readBy: [],
         sender: user._id.toString(),
-        status: "sending",
         target: selectedChat.recipient
       };
 
@@ -118,7 +114,7 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
       }
       try {
         // Listen for the response from the server
-        socket.on("sendMessageSuccess", async (message) => {
+        socket.once("sendMessageSuccess", async (message) => {
           console.log("New message sent successfully:", message);
           const {
             createdAt,
@@ -128,6 +124,7 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
             readBy,
             sender,
             _id,
+            status
           } = message;
 
           const messageForState = () => {
@@ -139,7 +136,7 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
                 updatedAt,
                 readBy,
                 sender,
-                status: "sent",
+                status,
                 _id,
                 isOutgoing: true,
               };
@@ -168,7 +165,6 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
         payload: { message: _id, error: error },
       });
     } finally {
-      setIsSending(false);
     }
   };
   const formattedTime = new Date(updatedAt).toLocaleTimeString([], {
@@ -185,7 +181,7 @@ const { user, isAuthenticated, token } = useSelector((state) => state.auth);
     >
       <div
         className={`flex w-fit justify-between p-2 rounded-lg ${
-          isOutgoing ? "bg-teal-900 place-self-end" : "bg-cyan-800"
+          isOutgoing ? "bg-teal-900 place-self-end ml-[1rem]" : "bg-cyan-800 mr-[1rem]"
         } text-white`}
       >
         <div className="left flex flex-col">

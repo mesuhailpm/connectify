@@ -76,8 +76,8 @@ function ChatInput() {
       };
 
       // Emit the new message to the server
-      console.log(mongoose.Types.ObjectId.isValid(randomId), ' from valid'); // Check if the ID is valid
-      console.log(randomId)
+      
+      
       console.log("will emit", {
         _id: randomId,
         chat: selectedChat._id,
@@ -87,6 +87,10 @@ function ChatInput() {
         readBy:[],
         target: selectedChat.recipient
       });
+      if(!socket || socket.disconnected){
+        toast.warn('The server is not connected, try refreshing')
+        return;
+      }
       await socket.emit("sendMessage", {
         _id: randomId,
         chat: selectedChat._id,
@@ -152,6 +156,7 @@ function ChatInput() {
             readBy,
             sender,
             _id,
+            status
           } = message;
 
           const messageForState = () => {
@@ -163,7 +168,7 @@ function ChatInput() {
                 updatedAt,
                 readBy,
                 sender,
-                status: "sent",
+                status,
                 _id,
                 isOutgoing: true,
               };
