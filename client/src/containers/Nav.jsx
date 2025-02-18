@@ -8,7 +8,13 @@ import { useLocation } from "react-router-dom";
 export const Nav = () => {
   return (
     <nav className="flex w-full justify-between items-center font-bold  min-h-[30px]">
-      <Link className="flex" to={"/"}>
+      <Link className="flex" to={"/"}
+      onClick={(e) => {
+        if (window.location.pathname === "/chats") {
+          e.preventDefault();
+        }
+      }}     
+      >
         <img src={logo} width={30} alt="Logo" />
         <h1>Connectify</h1>
       </Link>
