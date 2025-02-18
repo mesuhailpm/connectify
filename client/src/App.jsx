@@ -148,7 +148,9 @@ function App() {
 
       <main className="flex grow max-h-full overflow-scroll hide-scrollbar">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={
+            ( isAuthenticated ? <Navigate to={"/chats"} replace /> : <Home /> )
+            } />
           <Route path="/login" element={<Login />} />
           <Route
             path="/chats"
