@@ -132,7 +132,7 @@ function App() {
       <div className="md:hidden flex items-center justify-center h-full">
         <h2 className="text-center text-2xl font-bold text-primary">Not Viewable on Mobile. Please Use a Larger Screen.</h2>
       </div>
-    <div className="app hidden relative md:flex flex-col bg-primary/50 border-4 w-full overflow-hidden border-red-700 px-2 h-full">
+    <div className="app hidden relative md:flex flex-col bg-primary/50 border-4 w-full overflow-hidden border-red-950 px-2 h-full">
       <ToastContainer
         position="top-right"
         autoClose={5000}
