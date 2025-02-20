@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../../src/logo.svg";
+import logo from "../../src/default-monochrome.svg";
 import "../App.css";
 
 import { useNavigate, Link } from "react-router-dom";
@@ -15,8 +15,7 @@ export const Nav = () => {
         }
       }}     
       >
-        <img src={logo} width={30} alt="Logo" />
-        <h1>Connectify</h1>
+        <img src={logo}  width={'150rem'} className="bg-red-50/30 p-2 rounded-md" alt="Logo" />
       </Link>
       <div className="links w-fit flex items-center justify-center gap-4">
         <Link to="/login"> Login</Link>

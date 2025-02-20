@@ -1,3 +1,9 @@
+# Logo created by 
+https://www.namecheap.com/logo-maker/app/
+
+# Logo Crop and Edit using
+https://www.pixelcut.ai/t/background-remover
+
 # Below content is auto generated on CRA command
 
 # Getting Started with Create React App
