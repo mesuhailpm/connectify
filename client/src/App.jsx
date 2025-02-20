@@ -24,6 +24,9 @@ import socket from "./sockets/socket";
 import { RECEIVE_MESSAGE } from "./constants/actionTypes";
 import incomingTone from "./assets/media/ding.mp3";
 import { fetchUnreadMessageNotifications } from "./actions/messageNotificationActions";
+import Terms from "./containers/Terms";
+import Privacy from "./containers/Privacy";
+import Contact from "./containers/Contact";
 
 function App() {
   const dispatch = useDispatch();
@@ -165,6 +168,9 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/help" element={<Help />} />
           <Route path="/about" element={<About />} />
+          <Route path="/terms" element={ <Terms /> } />
+          <Route path="/privacy" element={ <Privacy /> } />
+          <Route path="/contact" element= { <Contact />} />
         </Routes>
       </main>
 
